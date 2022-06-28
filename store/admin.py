@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Product
+from .models import Product,Variation
+
 from django.utils.html import format_html
 # Register your models here.
 class ProductAdmin(admin.ModelAdmin):
@@ -10,8 +11,14 @@ class ProductAdmin(admin.ModelAdmin):
 
     def imagen(self,obj):
         return format_html('<img src={}  width="80px" height="80px" />',obj.images.url)
-    
+
+class VariationAdmin(admin.ModelAdmin):
+    list_display = ('product','subtitulo','variation_value','stock','is_active','imagen')
+
+    def imagen(self,obj):
+        return format_html('<img src={}  width="80px" height="80px" />',obj.image.url)
+
 
 admin.site.register(Product, ProductAdmin)
-   
+admin.site.register(Variation,VariationAdmin)   
      

@@ -72,3 +72,26 @@ class ReviewRating(models.Model):
     
     def __str__(self):
         return self.subject
+
+variation_category_choices = (
+                                ('Edicion', 'Edicion'),
+                            )
+
+class Variation(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto')
+    subtitulo = models.CharField(max_length=100,verbose_name='Subtitulo',blank=True)
+    variantion_category = models.CharField(max_length=200,verbose_name='Variacion', choices = variation_category_choices)
+    variation_value = models.CharField(max_length=200,verbose_name='Edicion')
+    stock = models.IntegerField(verbose_name='Stock')
+    image = models.ImageField(upload_to='photos/products',blank=True,verbose_name='Imagen')
+    is_active = models.BooleanField(default=True,verbose_name='Disponible')
+    created_date = models.DateField(auto_now_add=True,verbose_name='Fecha de creacion')
+    updated_date = models.DateField(auto_now=True,verbose_name='Fecha de actualizacion')
+    
+    
+    def __unicode__(self):
+        return self.product
+    class Meta:
+        verbose_name = "Edicion"
+        verbose_name_plural = "Ediciones"
+           
