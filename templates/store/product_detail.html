@@ -55,20 +55,20 @@
 
 
               <hr>
-<!--
+
               <div class="row">
                 <div class="item-option-select">
-                  <h6>Seleccionar Color</h6>
+                  <h6>Seleccione Edición</h6>
                   <select class="form-control" name="color" required>
                     <option value="" disabled selected>Seleccione</option>
-                    {% for i in single_product.variation_set.colors %}
+                    {% for i in single_product.variation_set.edicion %}
                     <option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
                     {% endfor %}
                   </select>
                 </div>
               </div> 
               
-            
+<!--            
 
               <div class="row">
                 <div class="item-option-select">
@@ -84,10 +84,10 @@
 -->
               <hr>
 
-              {% if single_product.stock <= 0 %}
+              {% if single_product.stock_total <= 0 %}
               <h5 style="color:red; font-size:0.9em;">Producto fuera de stock</h5>
-              {% elif single_product.stock > 0 and single_product.stock < 6  %}
-              <h5 style="color:blue; font-size:0.9em;">Quedan {{ single_product.stock }} en stock</h5>
+              {% elif single_product.stock_total > 0 and single_product.stock_total < 6  %}
+              <h5 style="color:blue; font-size:0.9em;">Quedan {{ single_product.stock_total }} en stock</h5>
 
                 {% if in_cart %}
                   <a href="{% url 'cart' %}" class="btn  btn-outline-success"> <span class="text">Producto agregado al carrito</span> <i class="fas fa-shopping-cart"></i></a>

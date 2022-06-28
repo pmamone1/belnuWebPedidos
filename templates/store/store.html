@@ -67,10 +67,10 @@
                     <span class="price">$ {{ product.price }}     </span><span style="font-size:0.8em"> + {{product.recargo_interior}} (RI)</span>
                   </div> <!-- price-wrap.// -->
                 </div>
-                {% if product.stock <= 0 %}
+                {% if product.stock_total <= 0 %}
                 <h5 style="color:red; font-size:0.9em;margin-bottom:20px;">Producto fuera de stock</h5>
-                {% elif product.stock > 0 and product.stock < 6  %}
-                <h5 style="color:blue; font-size:0.9em; margin-top:-25px">Quedan {{ product.stock }} en stock</h5>
+                {% elif product.stock_total > 0 and product.stock < 6  %}
+                <h5 style="color:blue; font-size:0.9em; margin-top:-25px">Quedan {{ product.stock_total }} en stock</h5>
                 <a href="{% url 'add_cart' product.id %}" class="btn btn-block btn-success">Agregar al Carrito </a>
                 {% else %}
                 <a href="{% url 'add_cart' product.id %}" class="btn btn-block btn-success">Agregar al Carrito </a>

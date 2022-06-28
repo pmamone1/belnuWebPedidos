@@ -26,6 +26,18 @@ class Product(models.Model):
         verbose_name_plural = "Productos"
         ordering = ['product_name', '-created_date']
         
+    def stock_total(self,stock=0):
+        #product.variation_set.edicion
+        all_variations = Variation.objects.all().filter(product=self.id,variation_category='Edicion')        
+        
+        for variation in all_variations:
+            print("el stock es "+ str(variation.stock))
+            stock += variation.stock
+            if stock is not None:
+                return stock  
+        return 0
+            
+    
     def get_url(self):
         return reverse('product_detail', args=[self.category.slug, self.slug])
 
@@ -77,10 +89,16 @@ variation_category_choices = (
                                 ('Edicion', 'Edicion'),
                             )
 
+class VariationManager(models.Manager):
+    def edicion(self):
+        return super(VariationManager, self).filter(variation_category="Edicion",is_active=True)
+    
+
+
 class Variation(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto')
     subtitulo = models.CharField(max_length=100,verbose_name='Subtitulo',blank=True)
-    variantion_category = models.CharField(max_length=200,verbose_name='Variacion', choices = variation_category_choices)
+    variation_category = models.CharField(max_length=200,verbose_name='Variacion', choices = variation_category_choices)
     variation_value = models.CharField(max_length=200,verbose_name='Edicion')
     stock = models.IntegerField(verbose_name='Stock')
     image = models.ImageField(upload_to='photos/products',blank=True,verbose_name='Imagen')
@@ -88,6 +106,7 @@ class Variation(models.Model):
     created_date = models.DateField(auto_now_add=True,verbose_name='Fecha de creacion')
     updated_date = models.DateField(auto_now=True,verbose_name='Fecha de actualizacion')
     
+    objects = VariationManager()
     
     def __unicode__(self):
         return self.product
