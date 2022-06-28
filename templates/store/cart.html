@@ -22,9 +22,9 @@
     <table class="table table-borderless table-shopping-cart">
     <thead class="text-muted">
     <tr class="small text-uppercase">
-      <th scope="col">Product</th>
-      <th scope="col" width="120">Cantidad</th>
-      <th scope="col" width="120">Precio</th>
+      <th scope="col">Productos</th>
+      <th scope="col" class="text-center" width="120">Cantidad</th>
+      <th scope="col" class="text-left" width="160">Precio</th>
       <th scope="col" class="text-right" width="200"> </th>
     </tr>
     </thead>
@@ -34,7 +34,7 @@
     <tr>
         <td>
             <figure class="itemside align-items-center">
-                <div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
+                <a href="{{ cart_item.product.get_url }}"><div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div></a>
                 <figcaption class="info">
                     <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
 
@@ -55,7 +55,7 @@
                         <div class="col">
                             <div class="input-group input-spinner">
                                 <div class="input-group-prepend">
-                                <a href="{% url 'remove_cart' cart_item.product.id cart_item.id  %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
+                                <a href="{% url 'remove_cart' cart_item.product.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
                                 </div>
                                 <input type="text" class="form-control"  value="{{ cart_item.quantity }}">
                                 <div class="input-group-append">
@@ -76,11 +76,11 @@
         <td>
             <div class="price-wrap">
                 <var class="price">$  {{ cart_item.sub_total }}  </var>
-                <small class="text-muted"> $ {{cart_item.product.price}}    cada uno </small>
+                <small class="text-muted"> $ {{ cart_item.product.price }}    cada uno + {{cart_item.product.recargo_interior}} (RI)</small>
             </div> <!-- price-wrap .// -->
         </td>
         <td class="text-right">
-        <a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id  %}" class="btn btn-danger"> Eliminar</a>
+        <a href="{% url 'remove_cart_item' cart_item.product.id %}" class="btn btn-danger"> Eliminar</a>
         </td>
     </tr>
     {% endfor %}
@@ -97,22 +97,12 @@
             <div class="card">
             <div class="card-body">
                 <dl class="dlist-align">
-                  <dt>Precio Total:</dt>
-                  <dd class="text-right">$ {{ total }}</dd>
-                </dl>
-                <dl class="dlist-align">
-                  <dt>Impuesto:</dt>
-                  <dd class="text-right"> $ {{ tax }}</dd>
-                </dl>
-                <dl class="dlist-align">
-                  <dt>Total:</dt>
-                  <dd class="text-right text-dark b"><strong>$ {{grand_total}}</strong></dd>
+                  <dt>Total Pedido:</dt>
+                  <dd class="text-right text-dark b"><strong>$ {{total}}</strong></dd>
                 </dl>
                 <hr>
-                <p class="text-center mb-3">
-                    <img src="{% static './images/misc/payments.png' %}" height="26">
-                </p>
-                <a href="{% url 'checkout' %}" class="btn btn-primary btn-block"> Pagar </a>
+                
+                <a href="#" class="btn btn-primary btn-block"> Hacer Pedido </a>
                 <a href="{% url 'store' %}" class="btn btn-light btn-block">Continua comprando</a>
             </div> <!-- card-body.// -->
             </div> <!-- card.// -->

@@ -1,7 +1,12 @@
 from logging import exception
-from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
+from django.db.models import Q
+from django.contrib import messages
+
+from carts.models import CartItem
+from carts.views import _cart_id
+
 from .models import Product
 from category.models import Category
 
@@ -10,12 +15,12 @@ def store(request, category_slug=None):
     categories = None
     products = None
     category = Category.objects.all()
-
+        
 
     if category_slug != None:
         categories = get_object_or_404(Category, slug=category_slug)
         products = Product.objects.filter(category=categories, is_available=True).order_by('id')
-        paginator = Paginator(products, 5)
+        paginator = Paginator(products, 6)
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
         product_count = products.count()
@@ -30,6 +35,7 @@ def store(request, category_slug=None):
         'products' : paged_products,
         'product_count': product_count,
         'category': category,
+        
     }
 
     return render(request, 'store/store.html', context)
@@ -52,13 +58,13 @@ def search(request):
 def product_detail(request, category_slug, product_slug):
     try:
         single_product = Product.objects.get(category__slug=category_slug, slug=product_slug)
+        in_cart = CartItem.objects.filter(cart__cart_id=_cart_id(request),product=single_product).exists()
+        
         context = {
             'single_product': single_product,
+            'in_cart': in_cart,
         }
     except Exception as e:
         raise e
-    context ={
-        'single_product': single_product,
-    }
-        
+            
     return render(request, 'store/product_detail.html', context)

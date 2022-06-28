@@ -65,7 +65,8 @@ class Account(AbstractBaseUser):
     class Meta:
         verbose_name = "Cuenta de Usuario"
         verbose_name_plural = "Cuentas de Usuarios"
-
+        ordering = ['date_joined']
+        
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
 

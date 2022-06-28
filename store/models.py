@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from django.db import models
 from category.models import Category
 from accounts.models import Account
@@ -10,7 +11,9 @@ class Product(models.Model):
     product_name = models.CharField(max_length=200,unique=True,verbose_name='Nombre Producto')
     slug = models.SlugField(max_length=200,unique=True)
     description = models.CharField(max_length=500,blank=True,verbose_name='Descripción')
-    price = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='Precio')
+    price = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='PVP')
+    recargo_interior = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='Recargo Interior')
+    porcentaje_vv = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='% Vendedor')
     images = models.ImageField(upload_to='photos/products',blank=True,verbose_name='Imagen')
     stock = models.IntegerField(verbose_name='Stock')
     is_available = models.BooleanField(default=True,verbose_name='Disponible')
@@ -18,12 +21,23 @@ class Product(models.Model):
     created_date = models.DateField(auto_now_add=True,verbose_name='Fecha de creacion')
     modified_date = models.DateField(auto_now=True,verbose_name='Fecha de actualizacion')
     
+    class Meta:
+        verbose_name = "Producto"
+        verbose_name_plural = "Productos"
+        ordering = ['product_name', '-created_date']
+        
     def get_url(self):
         return reverse('product_detail', args=[self.category.slug, self.slug])
 
     def __str__(self):
         return self.product_name
 
+    def pvp_total(self):
+        return self.price + self.recargo_interior
+    
+    def precio_vv(self):
+        return (self.price*self.porcentaje_vv/100) + self.recargo_interior
+    
     def averageReview(self):
         reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
         avg=0
@@ -39,10 +53,6 @@ class Product(models.Model):
 
         return count
 
-    class Meta:
-        verbose_name = "Producto"
-        verbose_name_plural = "Productos"
-        ordering = ['product_name']
     
 class ReviewRating(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -55,5 +65,10 @@ class ReviewRating(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = "Valoracion"
+        verbose_name_plural = "Valoraciones"
+        ordering = ['rating']
+    
     def __str__(self):
         return self.subject
