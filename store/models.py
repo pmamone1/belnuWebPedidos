@@ -26,6 +26,8 @@ class Product(models.Model):
         verbose_name_plural = "Productos"
         ordering = ['product_name', '-created_date']
         
+
+        
     def stock_total(self,stock=0):
         #product.variation_set.edicion
         all_variations = Variation.objects.all().filter(product=self.id,variation_category='Edicion')        
@@ -44,12 +46,15 @@ class Product(models.Model):
     def __str__(self):
         return self.product_name
 
+    @property
     def pvp_total(self):
         return self.price + self.recargo_interior
     
+    @property
     def precio_vv(self):
         return (self.price*self.porcentaje_vv/100) + self.recargo_interior
     
+    @property
     def averageReview(self):
         reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
         avg=0
@@ -57,6 +62,7 @@ class Product(models.Model):
             avg = float(reviews['average'])
         return avg
 
+    @property
     def countReview(self):
         reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=Count('id'))
         count=0
@@ -98,10 +104,10 @@ class VariationManager(models.Manager):
 class Variation(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto')
     subtitulo = models.CharField(max_length=100,verbose_name='Subtitulo',blank=True)
-    variation_category = models.CharField(max_length=200,verbose_name='Variacion', choices = variation_category_choices)
+    variation_category = models.CharField(max_length=200,verbose_name='Variacion', choices = variation_category_choices,default='Edicion')
     variation_value = models.CharField(max_length=200,verbose_name='Edicion')
     stock = models.IntegerField(verbose_name='Stock')
-    image = models.ImageField(upload_to='photos/products',blank=True,verbose_name='Imagen')
+    image = models.ImageField(upload_to='photos/products',blank=True,verbose_name='Imagen',null=True)
     is_active = models.BooleanField(default=True,verbose_name='Disponible')
     created_date = models.DateField(auto_now_add=True,verbose_name='Fecha de creacion')
     updated_date = models.DateField(auto_now=True,verbose_name='Fecha de actualizacion')
@@ -113,4 +119,9 @@ class Variation(models.Model):
     class Meta:
         verbose_name = "Edicion"
         verbose_name_plural = "Ediciones"
-           
+        constraints = [
+            models.UniqueConstraint(
+                fields=['product', 'variation_value'], name='id_titulo_edicion'
+            )
+        ]       
+        

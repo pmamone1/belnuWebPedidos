@@ -1,13 +1,18 @@
 from logging import exception
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect,HttpResponse,HttpResponseRedirect
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib import messages
+from rest_framework import viewsets
+from .serializers import VariationSerializer
+import simplejson
+
+
 
 from carts.models import CartItem
 from carts.views import _cart_id
 
-from .models import Product
+from .models import Product, Variation
 from category.models import Category
 
 
@@ -68,3 +73,4 @@ def product_detail(request, category_slug, product_slug):
         raise e
             
     return render(request, 'store/product_detail.html', context)
+
