@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.contrib import messages
 from rest_framework import viewsets
 from .serializers import VariationSerializer
-import simplejson
+import json
 
 
 
@@ -74,3 +74,15 @@ def product_detail(request, category_slug, product_slug):
             
     return render(request, 'store/product_detail.html', context)
 
+def get_ajax_titulo(request):
+    print("serializer data")
+    titulo=request.GET.get('titulo')
+    edicion=request.GET.get('edicion')
+    print(titulo,edicion)        
+        
+    variations = Variation.objects.get(variation_value=edicion, product=titulo)
+    serializer = VariationSerializer(variations)
+    print("Pablo...",serializer.data)
+    #return HttpResponse(serializer.data)
+    return HttpResponse(json.dumps({"data":serializer.data}), content_type="application/json")
+  
