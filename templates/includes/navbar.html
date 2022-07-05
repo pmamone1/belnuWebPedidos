@@ -67,8 +67,8 @@
           <div class="widget-header">
             <small class="title text-muted">Bienvenido visitante!</small>
             <div>
-              <a href="#">Login</a> <span class="dark-transp"> | </span>
-              <a href="#"> Registrar</a>
+              <a href="{% url 'login' %}">Login</a> <span class="dark-transp"> | </span>
+              <a href="{% url 'register' %}"> Registrar</a>
             </div>
           </div>
           {% else %}
@@ -77,7 +77,7 @@
             <small class="title text-muted">Bienvenido </small>
             <div>
               <a href="#">Dashboard</a> <span class="dark-transp"> | </span>
-              <a href="#">Salir Sesion</a>
+              <a href="{% url 'logout' %}">Salir Sesion</a>
             </div>
           </div>
 
