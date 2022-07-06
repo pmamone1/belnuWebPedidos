@@ -114,6 +114,9 @@ class Variation(models.Model):
     
     objects = VariationManager()
     
+    def get_url_2(self):
+        return reverse('product_detail_2', args=[self.product.category.slug, self.product.slug,self.variation_value])
+    
     def __str__(self):
         return self.variation_category + ": " + self.variation_value
     

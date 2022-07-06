@@ -74,6 +74,21 @@ def product_detail(request, category_slug, product_slug):
             
     return render(request, 'store/product_detail.html', context)
 
+def product_detail_2(request, category_slug, product_slug,edicion):
+    try:
+        single_product = Product.objects.get(category__slug=category_slug, slug=product_slug)
+        in_cart = CartItem.objects.filter(cart__cart_id=_cart_id(request),product=single_product).exists()
+        edicion= Variation.objects.get(variation_value=edicion, product=single_product)
+        context = {
+            'single_product': single_product,
+            'in_cart': in_cart,
+            'edicion': edicion,
+        }
+    except Exception as e:
+        raise e
+            
+    return render(request, 'store/product_detail.html', context)
+
 def get_ajax_titulo(request):
     print("serializer data")
     titulo=request.GET.get('titulo')

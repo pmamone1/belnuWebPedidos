@@ -34,17 +34,27 @@
     <tr>
         <td>
             <figure class="itemside align-items-center">
-                <a href="{{ cart_item.product.get_url }}"><div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div></a>
-                <figcaption class="info">
-                    <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-
+                
+                {% for item in cart_item.variations.all %}
+                <p id="edicion" class="edicion" hidden>{{item.variation_value}}</p>
+                <a href="{{ item.get_url_2 }}"><div class="aside"><img id="imagen" src="{{ item.image.url }}" class="img-sm"></div></a>
+                {% endfor %}
+                
+                
+                <figcaption class="info">                    
+                    {% for item in cart_item.variations.all %}
+                    <a href="{{ item.get_url_2 }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
+                    {% endfor %}
+                    <p id="titulo" class="titulo" hidden>{{cart_item.product.id}}</p>
                     <p class="text-muted small">
                         {% if cart_item.variations.all %}
                             {% for item in cart_item.variations.all %}
                                 {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
-                            {% endfor %}
+                                <p id="edicion" class="edicion" hidden>{{item.variation_value}}</p>
+                                
+                                {% endfor %}
                         {% endif %}
-
+                        
                     </p>
 
                 </figcaption>
@@ -114,5 +124,54 @@
     </div> <!-- container .//  -->
 </section>
     <!-- ========================= SECTION CONTENT END// ========================= -->
+
+    <script>
+        // Funcion que debe estar siempre 
+         function getCookie(name) {
+           var cookieValue = null;
+           if (document.cookie && document.cookie != '') {
+               var cookies = document.cookie.split(';');
+               for (var i = 0; i < cookies.length; i++) {
+                   var cookie = jQuery.trim(cookies[i]);
+                   // Does this cookie string begin with the name we want?
+                   if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                       cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                       break;
+                   }
+               }
+           }
+           return cookieValue;
+       }
+       
+function Buscar(){
+    var csrftoken = getCookie('csrftoken');  
+         var edicion = $("#edicion").text();
+         alert("edicion="+edicion)
+         var titulo = $("#titulo").text();
+         alert("titulo="+titulo)
+         var urls="http://127.0.0.1:8000/store/get_ajax_titulo/"
+         var url = new URL(urls),
+           params = {titulo:titulo, edicion:edicion}
+       Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+         //alert(url);
+       
+           fetch(url, {
+             headers:{
+                 'Accept': 'application/json',
+                 'X-Requested-With': 'XMLHttpRequest', //Necessary to work with request.is_ajax()
+             },
+             method: 'GET',     
+         })
+         .then(response => response.json())
+         .then(data => {
+         console.log(data)
+         var content = data;
+         console.log("imagen="+content.data.image);
+         var img = document.getElementById('imagen')
+         img.src = content.data.image;  
+       });
+    };       
+    
+       </script>
 
 {% endblock %}
