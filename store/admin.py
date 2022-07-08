@@ -4,7 +4,7 @@ from .models import Product,Variation
 from django.utils.html import format_html
 # Register your models here.
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('product_name', 'price', 'recargo_interior','precio_vv', 'porcentaje_vv', 'stock','stock_total','category', 'is_available', 'modified_date','imagen')
+    list_display = ('product_name', 'price', 'recargo_interior','precio_vv', 'porcentaje_vv','stock_total','category', 'is_available','imagen', 'modified_date')
     list_filter = ('is_available', 'category', 'modified_date')
     search_fields = ('product_name',)
     prepopulated_fields = {'slug': ('product_name',)}

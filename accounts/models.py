@@ -1,9 +1,5 @@
-from tabnanny import verbose
-from time import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-import datetime
-
 
 # Create your models here.
 class MyAccountManager(BaseUserManager):
@@ -42,11 +38,14 @@ class MyAccountManager(BaseUserManager):
         return user
 
 
+
+
+
 class Account(AbstractBaseUser):
     first_name = models.CharField(max_length=50,verbose_name='Nombre')
     last_name = models.CharField(max_length=50,verbose_name='Apellido')
-    username = models.CharField(max_length=50, unique=True)
-    email = models.CharField(max_length=100, unique=True)
+    username = models.CharField(max_length=50, unique=True,verbose_name='Usuario')
+    email = models.CharField(max_length=100, unique=True,verbose_name='Email')
     phone_number = models.CharField(max_length=50,verbose_name='Telefono',blank=True)
 
     #campos atributos de django
@@ -61,12 +60,12 @@ class Account(AbstractBaseUser):
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     objects = MyAccountManager()
-
     class Meta:
         verbose_name = "Cuenta de Usuario"
         verbose_name_plural = "Cuentas de Usuarios"
         ordering = ['date_joined']
         
+   
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
 
@@ -78,6 +77,35 @@ class Account(AbstractBaseUser):
 
     def has_module_perms(self, add_label):
         return True
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE,verbose_name='Usuario')
+    address_line_1 =  models.CharField(blank=True, max_length=100,verbose_name='Dirección')
+    address_line_2 =  models.CharField(blank=True, max_length=100,verbose_name='Dirección 2')
+    profile_picture = models.ImageField(blank=True, upload_to='userprofile',verbose_name='Imagen de Perfil')
+    city = models.CharField(blank=True, max_length=20,verbose_name='Ciudad')
+    state = models.CharField(blank=True, max_length=20,verbose_name='Provincia')
+    country = models.CharField(blank=True, max_length=20,verbose_name='Pais')
+    numero_vendedor = models.IntegerField(blank=True,verbose_name='Numero de vendedor',unique=True,default="0")
+    nombre_vendedor = models.CharField(blank=True,max_length=50,verbose_name='Nombre de vendedor',unique=True,default="deposito")
+    
+    def __str__(self):
+        return self.full_name() + ' - ' + self.numero_vendedor + ' - ' + self.nombre_vendedor
+    
+    def __str__(self):
+        return self.user.first_name
+
+    def full_address(self):
+        return f'{self.address_line_1} {self.address_line_2}'
+
+    def full_name(self):
+        return f'{self.user.full_name()}'
+
+    class Meta:
+        verbose_name = "Perfil de usuario"
+        verbose_name_plural = "Perfiles de usuario"
+
 
 class Subcuenta(models.Model):
     nombre = models.CharField(max_length=50,verbose_name='Nombre',unique=True)
@@ -102,19 +130,3 @@ class Distribuidora(models.Model):
     
     def __str__(self):
         return self.codigo + " - " + self.nombre
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(Account, on_delete=models.CASCADE,verbose_name='Usuario')
-    profile_picture = models.ImageField(blank=True, upload_to='userprofile',verbose_name='Imagen de perfil')
-    numero_vendedor = models.IntegerField(blank=True,verbose_name='Numero de vendedor',unique=True,default="0")
-    nombre_vendedor = models.CharField(max_length=50,verbose_name='Nombre de vendedor',unique=True,default="deposito")
-    
-    def __str__(self):
-        return self.full_name() + ' - ' + self.numero_vendedor + ' - ' + self.nombre_vendedor
-
-    def full_name(self):
-        return f'{self.user.full_name()}'
-
-    class Meta:
-        verbose_name = "Perfil de usuario"
-        verbose_name_plural = "Perfiles de usuario"
