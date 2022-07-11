@@ -16,6 +16,18 @@
             <form action="{% url 'register' %}" method="POST" >
                   {% csrf_token %}
 
+                  <div class="form-row">
+                    <div class="col form-group">
+                        <label>Numero de Vendedor</label>
+                        <input type ="number" class="form-control" name="numero_vendedor"></input>
+                    </div> <!-- form-group end.// -->
+                    <div class="col form-group">
+                        <label>Nombre de Vendedor</label>
+                        <input type="text" class="form-control" name="nombre_vendedor"></input>
+                    </div> <!-- form-group end.// -->
+                </div> <!-- form-row end.// -->
+
+
                     <div class="form-row">
                         <div class="col form-group">
                             <label>Nombre</label>

@@ -1,5 +1,10 @@
 from django import  forms
 from .models import Account, UserProfile
+#from six import python_2_unicode_compatible
+#from betterforms.multiform import MultiModelForm
+#from betterforms.forms import BaseForm
+
+
 
 
 class RegistrationForm(forms.ModelForm):
@@ -58,3 +63,9 @@ class UserProfileForm(forms.ModelForm):
         super(UserProfileForm, self).__init__(*args,**kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+
+#class RegisterFinalForm(MultiModelForm):
+#    form_classes = {
+#        'account': RegistrationForm,
+#        'profile': UserProfileForm,
+#    }

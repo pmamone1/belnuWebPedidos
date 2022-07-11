@@ -18,11 +18,17 @@
                 <strong class="d-inline-block mr-3">Editar Perfil de Usuario </strong>
             </header>
             <div class="card-body">
-              <div class="text-right">
-                  <img src="{{userprofile.profile_picture.url}}" alt="Imagen de perfil" width="100" style="border-radius:50px;">
-              </div>
-
+                
+                
+              <div class="form-row">
+                
               <div class="row">
+                <div class="col-md-12">
+                    <img src="{{userprofile.profile_picture.url}}" alt="Imagen de perfil" height="120" width="100" style="border-radius:50px;">
+                    <label style="margin-left:20px; margin-top:-200px;" for="">Numero de Vendedor:</label><span style="margin-left:15px; color:blue"><strong>{{ numero_vendedor }}</strong></span>
+                    <label style="margin-left:60px; margin-top:20px;" for="">Nombre de Vendedor:</label><span style="margin-left:15px; color:blue"><strong> {{ nombre_vendedor }}</strong></span>
+                    
+                </div>
 
                 <div class="col-md-12">
                     <form class="" action="{% url 'edit_profile' %}" method="post" enctype="multipart/form-data">

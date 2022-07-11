@@ -11,6 +11,12 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.core.mail import EmailMessage
 
+import smtplib
+import ssl
+from email.message import EmailMessage
+
+
+
 from carts.views import _cart_id
 from carts.models import Cart, CartItem
 import requests
@@ -18,7 +24,13 @@ import requests
 # Create your views here.
 def register(request):
     form = RegistrationForm()
+    
     if request.method == 'POST':
+        numero_vendedor = request.POST.get('numero_vendedor',"")
+        nombre_vendedor = request.POST.get('nombre_vendedor',"")
+        if numero_vendedor == "" or nombre_vendedor == "":
+            messages.warning(request, 'No ingreso Numero y/o Nombre de Vendedor')
+            return redirect('register')             
         form = RegistrationForm(request.POST)
         if form.is_valid():
             first_name = form.cleaned_data['first_name']
@@ -26,7 +38,7 @@ def register(request):
             phone_number = form.cleaned_data['phone_number']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            # vaxidrez@gmail.com
+            
             username = email.split("@")[0]
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password )
             user.phone_number = phone_number
@@ -36,25 +48,40 @@ def register(request):
             profile = UserProfile()
             profile.user_id = user.id
             profile.profile_picture = 'default/default-user.png'
+            profile.numero_vendedor = numero_vendedor
+            profile.nombre_vendedor = nombre_vendedor
             profile.save()
 
-
-
             current_site = get_current_site(request)
-            mail_subject = 'Por favor activa tu cuenta en Vaxi Drez'
+
+            # Configuracion de los mails
+            email_sender = 'belnu.pedidos@gmail.com'
+            email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+            email_receiver = email
+
+            # configuramos el mail 
+            subject = 'Por favor activa tu cuenta en Belnu Pedidos Web!'
             body = render_to_string('accounts/account_verification_email.html', {
                 'user': user,
                 'domain': current_site,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
             })
-            to_email = email
-            send_email = EmailMessage(mail_subject, body, to=[to_email])
-            send_email.send()
 
+            em = EmailMessage()
+            em['From'] = email_sender
+            em['To'] = email_receiver
+            em['Subject'] = subject
+            em.set_content(body)
 
-            #messages.success(request, 'Se registro el usuario exitosamente')
+            # Add SSL (layer of security)
+            context = ssl.create_default_context()
 
+            # Log in and send the email
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                smtp.login(email_sender, email_password)
+                smtp.sendmail(email_sender, email_receiver, em.as_string())
+                messages.success(request, 'Se registro el usuario exitosamente')
             return redirect('/accounts/login/?command=verification&email='+email)
 
 
@@ -72,7 +99,7 @@ def login(request):
         user = auth.authenticate(email=email, password=password)
 
         if user is not None:
-
+            print("hay usu")
             try:
                 cart = Cart.objects.get(cart_id=_cart_id(request))
                 is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
@@ -113,9 +140,9 @@ def login(request):
 
 
             # http://127.0.0.1:8000/accounts/login/?next=/cart/checkout/
+            
             auth.login(request, user)
             messages.success(request, 'Has iniciado sesion exitosamente')
-
             url  = request.META.get('HTTP_REFERER')
             try:
                 query = requests.utils.urlparse(url).query
@@ -126,13 +153,52 @@ def login(request):
                     return redirect(nextPage)
             except:
                 return redirect('dashboard')
+    
         else:
-            messages.error(request, 'Las credenciales son incorrectas')
-            return redirect('login')
+            
+            if Account.objects.filter(email=email).exists():
+                user=Account.objects.filter(email=email).first()
+                print("pppp" +email)
+                messages.error(request, 'El usuario no se encuentra activo')
+                current_site = get_current_site(request)
+
+                # Configuracion de los mails
+                email_sender = 'belnu.pedidos@gmail.com'
+                email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+                email_receiver = email
+
+                # configuramos el mail 
+                subject = 'Por favor activa tu cuenta en Belnu Pedidos Web!'
+                body = render_to_string('accounts/account_verification_email.html', {
+                    'user': user,
+                    'domain': current_site,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': default_token_generator.make_token(user),
+                })
+
+                em = EmailMessage()
+                em['From'] = email_sender
+                em['To'] = email_receiver
+                em['Subject'] = subject
+                em.set_content(body)
+
+                # Add SSL (layer of security)
+                context = ssl.create_default_context()
+
+                # Log in and send the email
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                    smtp.login(email_sender, email_password)
+                    smtp.sendmail(email_sender, email_receiver, em.as_string())
+                    messages.success(request, 'No has activado tu cuenta todavia, te hemos enviado un nuevo enlace a tu mail para que puedas activar tu cuenta')
+                return redirect('/accounts/login/?command=verification&email='+email)
+            else:    
+                print("no hay usu")
+                messages.error(request, 'Las credenciales son incorrectas')
+                return redirect('login')
 
 
     return render(request, 'accounts/login.html')
-
+  
 @login_required(login_url='login')
 def logout(request):
     auth.logout(request)
@@ -180,17 +246,35 @@ def forgotPassword(request):
             user = Account.objects.get(email__exact=email)
 
             current_site = get_current_site(request)
-            mail_subject = 'Resetear Password'
-            body = render_to_string('accounts/reset_password_email.html',{
+
+            # Configuracion de los mails
+            email_sender = 'belnu.pedidos@gmail.com'
+            email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+            email_receiver = email
+
+            # configuramos el mail 
+            subject = 'Por favor activa tu cuenta en Belnu Pedidos Web!'
+            body = render_to_string('accounts/account_verification_email.html', {
                 'user': user,
                 'domain': current_site,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
             })
-            to_email = email
-            send_email = EmailMessage(mail_subject, body , to=[to_email])
-            send_email.send()
 
+            em = EmailMessage()
+            em['From'] = email_sender
+            em['To'] = email_receiver
+            em['Subject'] = subject
+            em.set_content(body)
+
+            # Add SSL (layer of security)
+            context = ssl.create_default_context()
+
+            # Log in and send the email
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                smtp.login(email_sender, email_password)
+                smtp.sendmail(email_sender, email_receiver, em.as_string())
+                
             messages.success(request, 'Un email fue enviado a tu bandeja de entrada para resetear tu password')
             return redirect('login')
         else:
@@ -244,6 +328,9 @@ def my_orders(request):
 @login_required(login_url='login')
 def edit_profile(request):
     userprofile = get_object_or_404(UserProfile, user=request.user)
+    vendedor=UserProfile.objects.get(user=request.user)
+
+    print(vendedor.numero_vendedor, vendedor.nombre_vendedor)
     if request.method == 'POST':
         user_form = UserForm(request.POST, instance=request.user)
         profile_form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
@@ -260,6 +347,8 @@ def edit_profile(request):
         'user_form': user_form,
         'profile_form': profile_form,
         'userprofile': userprofile,
+        'numero_vendedor': vendedor.numero_vendedor,
+        'nombre_vendedor': vendedor.nombre_vendedor,
     }
 
     return render(request, 'accounts/edit_profile.html', context)

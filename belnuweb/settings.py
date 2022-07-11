@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'carts',
     'orders',
     'colorfield',
+    'betterforms',
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
@@ -66,6 +67,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'belnuweb.wsgi.application'
 
+
+AUTH_USER_MODEL = 'accounts.Account'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -121,6 +124,8 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /'media'
+
+
 
 
 from django.contrib.messages import constants as messages
