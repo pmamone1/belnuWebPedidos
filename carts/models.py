@@ -1,39 +1,25 @@
-from tabnanny import verbose
 from django.db import models
 from store.models import Product, Variation
-
+from accounts.models import Account
 # Create your models here.
-class Cart(models.Model):
-   cart_id = models.CharField(max_length=250,blank=True,verbose_name='Id_Carrito')
-   date_added = models.DateField(auto_now_add=True,verbose_name='Fecha de agregado')
-    
-   class Meta:
-        verbose_name = "Carrito"
-        verbose_name_plural = "Carritos"
-        ordering = ['-date_added']
-    
-   
-   def __str__(self):
-       return self.cart_id
 
-    
-    
+class Cart(models.Model):
+    cart_id = models.CharField(max_length=250, blank=True)
+    date_added = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.cart_id
+
 class CartItem(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto')
-    variations = models.ManyToManyField(Variation, blank=True,verbose_name='Variaciones')
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE,verbose_name='Carrito')
-    quantity = models.IntegerField(verbose_name='Cantidad')
-    is_active =models.BooleanField(default=True,verbose_name='Activo')
-    
-    def __unicode__(self):
-        return self.product
+    user = models.ForeignKey(Account, on_delete=models.CASCADE,null=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    variations = models.ManyToManyField(Variation, blank=True)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE,null=True)
+    quantity = models.IntegerField()
+    is_active = models.BooleanField(default=True)
 
     def sub_total(self):
-        return (self.product.price + self.product.recargo_interior) * self.quantity
+        return self.product.price * self.quantity
 
-    class Meta:
-       verbose_name = "Item de Carrito"
-       verbose_name_plural = "Items de Carrito"
-       ordering = ['product']
-       
-       
+    def __unicode__(self):
+        return self.product

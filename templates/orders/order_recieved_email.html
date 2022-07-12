@@ -1,7 +1,11 @@
 {% autoescape off %}
 
-  Hola {{user.first_name}},
+  Hola {{user.first_name}} {{user.last_name}},
 
-  Hemos recibido tu orden  {{ order.order_number }}
+  Hemos recibido tu pedido nro.  {{ order.order_number }}
+
+  en las proximas 48hs lo tendras en tu kiosco.
+
+  Gracias por hacer tu pedido en Belnu Pedidos Web!
 
 {% endautoescape %}

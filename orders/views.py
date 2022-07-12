@@ -79,6 +79,7 @@ def place_order(request, total=0, quantity=0):
     cart_count = cart_items.count()
 
     if cart_count <= 0:
+        print("cart_count="+ str(cart_count))
         return redirect('store')
 
     grand_total = 0
@@ -93,7 +94,7 @@ def place_order(request, total=0, quantity=0):
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
-
+        print("Pasamos!")
         if form.is_valid():
             data = Order()
             data.user = current_user

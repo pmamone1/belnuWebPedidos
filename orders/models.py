@@ -1,6 +1,6 @@
 from tabnanny import verbose
 from django.db import models
-from accounts.models import Account
+from accounts.models import Account,UserProfile
 from store.models import Product, Variation
 
 # Create your models here.
@@ -27,6 +27,7 @@ class Order(models.Model):
     )
 
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True,verbose_name='Usuario')
+    profile = models.ForeignKey(UserProfile,on_delete=models.SET_NULL,null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True,verbose_name='Pago')
     order_number = models.CharField(max_length=20,verbose_name='Numero de Pedido')
     first_name = models.CharField(max_length=50,verbose_name='Nombre')
@@ -64,6 +65,7 @@ class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE,verbose_name='Pedido')
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, blank=True, null=True,verbose_name='Pago')
     user = models.ForeignKey(Account, on_delete=models.CASCADE,verbose_name='Usuario')
+    profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto')
     variation = models.ManyToManyField(Variation, blank=True,verbose_name='Variaciones')
     quantity = models.IntegerField(verbose_name='Cantidad')

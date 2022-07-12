@@ -36,7 +36,7 @@
             {% csrf_token %}
             
             <article class="content-body">
-<!--
+
               <h2 class="title">{{ single_product.product_name }}</h2>
               <div class="rating-star">
                   <span>
@@ -49,7 +49,7 @@
               </div>
               <span>  Comentarios </span>
 
--->
+
               <div class="mb-2.5" style="font-size:1.5em;"><strong>{{ single_product.product_name }}</strong></div>
               <div id="titulo" name="titulo" hidden>{{ single_product.id }}</div>
               {% if edicion.subtitulo %}
@@ -122,7 +122,7 @@
 
     <div class="row">
       <div class="col-md-9">
-<!--
+
         <form action="#" method="post">
           {% csrf_token %}
           <h5>Escribe Tu Comentario</h5>
