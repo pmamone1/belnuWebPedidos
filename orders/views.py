@@ -8,6 +8,7 @@ import json
 from store.models import Product
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+from accounts.models import UserProfile
 
 # Create your views here.
 
@@ -94,7 +95,7 @@ def place_order(request, total=0, quantity=0):
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
-        print("Pasamos!")
+        
         if form.is_valid():
             data = Order()
             data.user = current_user
@@ -111,6 +112,10 @@ def place_order(request, total=0, quantity=0):
             data.order_total = grand_total
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
+            
+            userProfile = UserProfile.objects.get(user=current_user)
+            data.profile = userProfile
+            
             data.save()
 
             yr=int(datetime.date.today().strftime('%Y'))
@@ -131,7 +136,7 @@ def place_order(request, total=0, quantity=0):
                 'tax': tax,
                 'grand_total': grand_total,
             }
-
+            
             return render(request, 'orders/payments.html', context)
     else:
         return redirect('checkout')

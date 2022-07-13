@@ -91,11 +91,9 @@ class UserProfile(models.Model):
     nombre_vendedor = models.CharField(blank=True,max_length=50,verbose_name='Nombre de vendedor',unique=True,null=True)
     
     def __str__(self):
-        return self.full_name() + ' - ' + self.numero_vendedor + ' - ' + self.nombre_vendedor
+        return self.full_name() + ' - ' + str(self.numero_vendedor) + ' - ' + self.nombre_vendedor
     
-    def __str__(self):
-        return self.user.first_name
-
+    
     def full_address(self):
         return f'{self.address_line_1} {self.address_line_2}'
 

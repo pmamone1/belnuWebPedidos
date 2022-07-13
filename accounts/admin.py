@@ -28,7 +28,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     #
     # thumbnail.short_description = 'Imagen de Perfil'
     #list_display = ('thumbnail', 'user', 'city', 'state', 'country')
-    list_display = ('user', 'city', 'state', 'country')
+    list_display = ('user', 'numero_vendedor','nombre_vendedor','city', 'state', 'country')
 # Register your models here.
 admin.site.register(Account, AccountAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
