@@ -4,20 +4,6 @@ from accounts.models import Account,UserProfile
 from store.models import Product, Variation
 
 # Create your models here.
-class Payment(models.Model):
-    user = models.ForeignKey(Account, on_delete=models.CASCADE,verbose_name='Usuario')
-    payment_id = models.CharField(max_length=100,verbose_name='ID de pago')
-    payment_method = models.CharField(max_length=100,verbose_name='Metodo de pago')
-    amount_id = models.CharField(max_length=100,verbose_name='ID de cantidad')
-    status = models.CharField(max_length=100,verbose_name='Estado')
-    created_at = models.DateTimeField(auto_now_add=True,verbose_name='Fecha de creacion')
-
-    def __str__(self):
-        return self.payment_id
-    class Meta:
-        verbose_name = "Pago"
-        verbose_name_plural = "Pagos"
-
 class Order(models.Model):
     STATUS = (
         ('New', 'Nuevo'),
@@ -27,21 +13,15 @@ class Order(models.Model):
     )
 
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True,verbose_name='Usuario')
-    profile = models.ForeignKey(UserProfile,on_delete=models.SET_NULL,null=True)
-    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True,verbose_name='Pago')
+    numero_vendedor = models.IntegerField(blank=True,verbose_name='Numero de vendedor',null=True)
+    nombre_vendedor = models.CharField(blank=True,max_length=50,verbose_name='Nombre de vendedor',null=True)
     order_number = models.CharField(max_length=20,verbose_name='Numero de Pedido')
     first_name = models.CharField(max_length=50,verbose_name='Nombre')
     last_name = models.CharField(max_length=50,verbose_name='Apellido')
     phone = models.CharField(max_length=50,verbose_name='Telefono',blank=True)
     email = models.CharField(max_length=50,verbose_name='Email')
-    addres_line_1 = models.CharField(max_length=100,verbose_name='Dirección')
-    addres_line_2 = models.CharField(max_length=100,verbose_name='Dirección 2',null=True,blank=True)
-    state = models.CharField(max_length=50,verbose_name="Provincia",null=True,blank=True)
-    city = models.CharField(max_length=50,verbose_name='Ciudad',null=True,blank=True)
-    country = models.CharField(max_length=50,verbose_name='Pais',null=True,blank=True)
-    order_note = models.CharField(max_length=100, blank=True,verbose_name='Notas')
-    order_total = models.FloatField(verbose_name='Total')
-    tax = models.FloatField(verbose_name="IVA",default=0)
+    order_total = models.DecimalField(max_digits=10, decimal_places=2,verbose_name='Total',null=True)
+    
     status = models.CharField(max_length=50, choices=STATUS, default='New',verbose_name='Estado')
     ip = models.CharField(blank=True, max_length=20,verbose_name='IP')
     is_ordered = models.BooleanField(default=False,verbose_name='Ordenado')
@@ -63,7 +43,6 @@ class Order(models.Model):
 
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE,verbose_name='Pedido')
-    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, blank=True, null=True,verbose_name='Pago')
     user = models.ForeignKey(Account, on_delete=models.CASCADE,verbose_name='Usuario')
     profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto')

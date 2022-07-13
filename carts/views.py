@@ -3,6 +3,8 @@ from store.models import Product, Variation
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
+from accounts.models import UserProfile
+import datetime
 
 # Create your views here.
 
@@ -204,6 +206,16 @@ def cart(request, total=0, quantity=0, cart_items=None):
 def checkout(request, total=0, quantity=0, cart_items=None):
     tax = 0
     grand_total = 0
+    userProfile = UserProfile.objects.get(user=request.user)
+    numero_vendedor = userProfile.numero_vendedor
+    nombre_vendedor = userProfile.nombre_vendedor
+    yr=int(datetime.date.today().strftime('%Y'))
+    mt=int(datetime.date.today().strftime('%m'))
+    dt=int(datetime.date.today().strftime('%d'))
+    d = datetime.date(yr,mt,dt)
+    current_date = d.strftime("%Y%m%d")
+    print("antes de entrar al try: "+str(numero_vendedor))
+    order_number = current_date+str(user.id)+str(numero_vendedor)
     try:
 
         if request.user.is_authenticated:
@@ -217,18 +229,31 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
-        tax = (2*total)/100
-        grand_total = total + tax
+        
+        grand_total = total
 
+        user = request.user
+         
+        context ={
+            'quantity': quantity,
+            'cart_items': cart_items,
+            'grand_total': grand_total,
+            'numero_vendedor': numero_vendedor,
+            'nombre_vendedor': nombre_vendedor,
+            'order_number': order_number,
+        }
+        
+    
     except ObjectDoesNotExist:
         pass ## solo ignora la exception
-
-    context = {
-        'total': total,
-        'quantity': quantity,
-        'cart_items': cart_items,
-        'tax' : tax,
-        'grand_total': grand_total
-    }
+    print(numero_vendedor, nombre_vendedor)
+    context ={
+            'quantity': quantity,
+            'cart_items': cart_items,
+            'grand_total': grand_total,
+            'numero_vendedor': numero_vendedor,
+            'nombre_vendedor': nombre_vendedor,
+            'order_number': order_number,
+        }
 
     return render(request, 'store/checkout.html', context)

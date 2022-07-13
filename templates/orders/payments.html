@@ -13,14 +13,14 @@
     <div class="row">
         <aside class="col-lg-8">
     <div class="card">
-          <h5 class="card-header">Direccion de Facturacion</h5>
+          <h5 class="card-header">Datos del Vendedor</h5>
           <div class="card-body">
+              <p class="card-text mb-0">{{ numero_vendedor }}</p>
+              <p class="card-text mb-0">{{ nombre_vendedor }}</p>
               <p class="card-text mb-0">{{ order.full_name }}</p>
-              <p class="card-text mb-0">{{ order.full_address }}</p>
-              <p class="card-text mb-0">{{ order.city }}, {{order.state}}</p>
-              <p class="card-text mb-0">{{ order.country }}</p>
-              <p class="card-text mb-0">{{ order.email }}</p>
-              <p class="card-text mb-0">{{ order.phone }}</p>
+              <p class="card-text mb-0">{{ fecha_pedido }}</p>
+              <p class="card-text mb-0">{{ grand_total }}</p>
+              
               {% if order.order_note %}
                   <b>Detalle de la Orden: </b> {{ order.order_note }}
               {% endif %}
