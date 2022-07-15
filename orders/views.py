@@ -114,7 +114,16 @@ def place_order(request, total=0, quantity=0):
         
         data.save()
         print("borramos el carrito y se guardo todo!")
-            
+        context = {
+            'grand_total': str(grand_total),
+            'numero_vendedor': numero_vendedor,
+            'nombre_vendedor': nombre_vendedor,
+            'nombre_completo': current_user.first_name + ", " + current_user.last_name,
+            'numero_pedido': order_number,
+            'status': data.status,
+            'fecha': str(data.created_at),
+        }
+        return redirect('order_complete', grand_total=grand_total, numero_vendedor=numero_vendedor, nombre_vendedor=nombre_vendedor, nombre_completo=current_user.first_name + ", " + current_user.last_name, numero_pedido=order_number, status=data.status, fecha=data.created_at)   
             
        
        
@@ -133,26 +142,24 @@ def place_order(request, total=0, quantity=0):
 
 
 
-def order_complete(request):
-    order_number = request.GET.get('order_number')
-    transID = request.GET.get('payment_id')
-
+def order_complete(request,numero_vendedor,grand_total,nombre_vendedor,nombre_completo,numero_pedido,status,fecha):
     try:
-        order = Order.objects.get(order_number=order_number, is_ordered=True)
+        order = Order.objects.get(order_number=numero_pedido, is_ordered=True)
         ordered_products = OrderProduct.objects.filter(order_id=order.id)
-
-        subtotal = 0
-        for i in ordered_products:
-            subtotal += i.product_price*i.quantity
-
-        #payment = Payment.objects.get(payment_id=transID)
-
-        context = {
-            'order': order,
+    except:
+        pass
+    print(ordered_products)
+    print(ordered_products.count())
+    context = {
             'ordered_products': ordered_products,
-            'order_number': order.order_number,
-            'subtotal': subtotal,
+            'grand_total': str(grand_total),
+            'numero_vendedor': numero_vendedor,
+            'nombre_vendedor': nombre_vendedor,
+            'nombre_completo': nombre_completo,
+            'fecha_pedido': fecha,
+            'numero_pedido': numero_pedido,
+            'nombre_completo': nombre_completo,
+            'status': status,
         }
-        return render(request, 'orders/order_complete.html', context)
-    except(Order.DoesNotExist):
-        return redirect('home')
+        
+    return render(request, 'orders/order_complete.html', context)
