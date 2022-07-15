@@ -17,13 +17,16 @@ def _cart_id(request):
 
 def add_cart(request, product_id):
     product = Product.objects.get(id=product_id)
-       
-    current_user = request.user
     
+        
+    current_user = request.user
+    profile = UserProfile.objects.get(user=current_user)
+    print("El profile es =" +str(profile))
     if current_user.is_authenticated:
         #aqui en este bloque agregaremos la logica del carrito de compras cuando
         #el usuario esta autenticado
         product_variation = []
+
 
         if request.method == 'POST':
             for item in request.POST:
@@ -61,6 +64,7 @@ def add_cart(request, product_id):
                 if len(product_variation) > 0 :
                     item.variations.clear()
                     item.variations.add(*product_variation)
+                item.profile=profile
                 item.save()
 
         else:
@@ -73,6 +77,7 @@ def add_cart(request, product_id):
             if len(product_variation) > 0 :
                 cart_item.variations.clear()
                 cart_item.variations.add(*product_variation)
+            cart_item.profile=profile
             cart_item.save()
 
         return redirect('cart')
@@ -118,12 +123,14 @@ def add_cart(request, product_id):
                   item_id = id[index]
                   item = CartItem.objects.get(product=product, id=item_id)
                   item.quantity += 1
+                  item.profile=profile
                   item.save()
             else:
                 item = CartItem.objects.create(product=product, quantity=1, cart=cart)
                 if len(product_variation) > 0 :
                     item.variations.clear()
                     item.variations.add(*product_variation)
+                item.profile=profile
                 item.save()
 
         else:
@@ -135,6 +142,7 @@ def add_cart(request, product_id):
             if len(product_variation) > 0 :
                 cart_item.variations.clear()
                 cart_item.variations.add(*product_variation)
+            cart_item.profile=profile
             cart_item.save()
 
         return redirect('cart')

@@ -52,7 +52,8 @@ class OrderProduct(models.Model):
     ordered = models.BooleanField(default=False,verbose_name='Ordenado')
     created_at = models.DateTimeField(auto_now_add=True,verbose_name='Fecha de creacion')
     updated_at = models.DateTimeField(auto_now=True,verbose_name='Fecha de actualizacion')
-
+    numero_pedido = models.CharField(max_length=20,verbose_name='Numero de Pedido',blank=True,null=True)
+    
     def __str__(self):
         return self.product.product_name
 

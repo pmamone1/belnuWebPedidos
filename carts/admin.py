@@ -6,8 +6,8 @@ class CartAdmin(admin.ModelAdmin):
     list_display = ('cart_id','date_added')
 
 class CartItemAdmin(admin.ModelAdmin):
-    list_display = ('product','cart', 'quantity', 'is_active')
-
+    list_display = ('profile','product', 'quantity', 'is_active','cart')
+    
 
 
 admin.site.register(Cart, CartAdmin)
