@@ -14,7 +14,26 @@
         <main class="col-md-9">
             <article class="card">
             <header class="card-header">
-                <strong class="d-inline-block mr-2"> Pedidos Realizados </strong>
+              <form action="{% url 'filtrar_pedido' %}" method="POST">
+                {% csrf_token %}
+              {% if filtro == 'Todos' %}
+                <strong class="d-inline-block mr-2" id="titulo_pedidos">Mostrar {{ filtro }} los Pedidos</strong>
+              {% else %}
+                <strong class="d-inline-block mr-2" id="titulo_pedidos">Mostrar pedidos {{ filtro }}</strong>
+              {% endif %}
+              <span style="margin-left:15vw;">Filtrar Pedidos:</span>
+              
+                <span><select id="filtro" name="filtro" style="border-radius:10px;padding:3px;margin-left:2px;">
+                  <option value="0">Elige una opción</option>
+                  <option id="1" value="1">Todos</option>
+                  <option id="2" value="2">Pendientes</option>
+                  <option id="3" value="3">Enviados</option>
+                  <option id="4" value="4">Cancelados</option>
+                </select>
+                </span>
+                <span><button id="boton_filtro" type="submit" class="btn btn-success" style="width:80px;border-radius:15px;padding:5px;margin-left:5px;" disabled>Filtrar</button></span>
+              </form>
+
             </header>
             <div class="card-body">
                 <div class="row">
@@ -27,7 +46,7 @@
                                   <th scope="col" style="text-align:center;">Numero Vendedor</th>
                                   
                                   <th scope="col">Total Pedido</th>
-                                  <th scope="col" style="width:30px;padding:30px">Fecha</th>
+                                  <th scope="col" style="width:10px;padding:30px">Fecha</th>
                                   <th scope="col">Estado</th>
                                   {% if user.is_admin %}
                                   <th scope="col" style="text-align:center;">Cancelar Pedido</th>
@@ -49,7 +68,7 @@
                                         {% if order.status == 'Accepted' %}
                                         <form action="{% url 'borrar_pedido' order.id %}" method="POST">
                                           {% csrf_token %}
-                                        <td style="text-align:center;"><button class="btn btn-danger">x</butto></td>
+                                        <td style="text-align:center;"><button style="font-size:0.5em" class="btn btn-danger">x</button></td>
                                           
                                           </form
                                         {% endif %}
@@ -117,5 +136,44 @@
 
     </section>
     <!-- ========================= SECTION CONTENT END// ========================= -->
+    <script>
+      var boton_filtro = document.getElementById("boton_filtro");
+      var filtro = document.getElementById("filtro");
+      boton_filtro.addEventListener("click", modifyText);
+     
+      filtro.addEventListener("click", activarBoton);
+
+      function activarBoton(){
+        
+        if(filtro.value != 0){
+          boton_filtro.disabled = false;
+        }
+      }
+      function modifyText() {
+        
+        if(filtro==1){
+          $("#1").attr("selected", "selected");
+          $("#titulo_pedidos").text("Todos los Pedidos");
+        }
+        if(filtro==2){
+          document.getElementById("2").classList.add = "selected";
+          $("#titulo_pedidos").text("Pedidos Pendientes");
+        }
+        if(filtro==3){
+          document.getElementById("3").classList.add = "selected";
+          $("#titulo_pedidos").text("Pedidos Enviados");
+        }
+        if(filtro==4){
+          document.getElementById("4").classList.add = "selected";
+          $("#titulo_pedidos").text("Pedidos Cancelados");
+        }
+        else{
+          filtro=filtro
+          $("#titulo_pedidos").text("Todos los Pedidos");
+        }
+      }
+    
+    </script>
+    
 
 {% endblock %}

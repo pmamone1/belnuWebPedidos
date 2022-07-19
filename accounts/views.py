@@ -13,7 +13,9 @@ from django.utils.encoding import force_bytes
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.db.models import Q
-
+from .serializers import OrderSerializer
+from django.shortcuts import HttpResponse
+import json
 
 import smtplib
 import ssl
@@ -324,12 +326,54 @@ def resetPassword(request):
     else:
         return render(request, 'accounts/resetPassword.html')
 
+def filtrar_pedido(request):
+    if request.method == 'POST':
+        filtro= request.POST.get('filtro')
+        print(filtro)
+    try:    
+        if filtro =="1":
+            orders = Order.objects.all().order_by('-created_at')
+        elif filtro =="2":
+            orders = Order.objects.filter(is_ordered=True,status="Accepted").order_by('-created_at')
+        elif filtro =="3":
+            orders = Order.objects.filter(is_ordered=True,status="Completed").order_by('-created_at')
+        elif filtro =="4":
+            orders = Order.objects.filter(is_ordered=False,status="Cancelado").order_by('-created_at')
+        
+    except:
+        pass
+    
+    paginator = Paginator(orders, 5)
+    page = request.GET.get('page')
+    paged_products = paginator.get_page(page)
+    product_count = orders.count()
+    
+    if filtro=="1":
+        filtro="Todos"
+    elif filtro=="2":
+        filtro="Pendientes"
+    elif filtro=="3":
+        filtro="Enviados"
+    elif filtro=="4":
+        filtro="Cancelados"
+    print("el filtro que esta pasando es =" +filtro)
+    
+    context = {
+        'product_count': product_count,
+        'orders': paged_products,
+        'filtro': filtro,
+    }
+     
+    return render(request, 'accounts/my_orders.html', context)
+    
+    
+
 
 def my_orders(request):
     if not request.user.is_admin:
         orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
     else:
-        orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
+        orders = Order.objects.all().filter(status="Accepted").order_by('-created_at')
         
     paginator = Paginator(orders, 5)
     page = request.GET.get('page')
@@ -345,8 +389,10 @@ def my_orders(request):
 
 def borrar_pedido(request, pk):
     order = Order.objects.get(pk=pk)
-    if order.status =="Aceptado":
+    if order.status =="Accepted":
+        print("Entro")
         order.status ="Cancelado"
+        order.is_ordered = False
         order.save()
         messages.success(request, 'El pedido se cancelo correctamente, se enviara un email al vendedor')
         current_site = get_current_site(request)
@@ -378,7 +424,8 @@ def borrar_pedido(request, pk):
             smtp.login(email_sender, email_password)
             smtp.sendmail(email_sender, email_receiver, em.as_string())
         return redirect('my_orders')
-
+    else:
+        print("no entro")
 
 
 

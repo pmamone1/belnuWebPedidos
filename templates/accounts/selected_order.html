@@ -41,7 +41,11 @@
                                                         <li>Vendedor : {{ order.numero_vendedor}} - {{ order.nombre_vendedor }}</li>
                                                         <li>Nombre y Apellido: {{ order.full_name }}</li>
                                                         <li>Nro. de Pedido: # {{ order.order_number }} </li>
-                                                        <li>Estado del Pedido: {{ order.status }}</li>
+                                                        {% if order.status == 'Accepted' %}
+                                                        <li>Estado del Pedido:<strong style="color:green"> {{ order.status }}</strong></li>
+                                                        {% else %}
+                                                        <li>Estado del Pedido:<strong style="color:red"> {{ order.status }}</strong></li>
+                                                        {% endif %}
                                                         <li>Fecha del Pedido: {{ fecha|date:"d-m-y" }}</li>    
                                                         
                                                     </ul>
