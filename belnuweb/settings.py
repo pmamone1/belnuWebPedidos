@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'orders',
     'colorfield',
     'betterforms',
+    'computed_property',
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'

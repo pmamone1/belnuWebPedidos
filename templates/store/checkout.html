@@ -13,7 +13,7 @@
     <div class="row">
         <aside class="col-lg-6">
     <div class="card">
-
+        {% include 'includes/alerts.html' %}
       <div class="card-body">
           <h4 class="card-title mb-4">Datos del Vendedor</h4>
           <form action="{% url 'place_order' %}" method="post">
@@ -122,7 +122,7 @@
 
 
 
-                <button type="submit" name="submit" class="btn btn-primary btn-block"> Ordenar los productos </button>
+                <button type="submit" name="submit" class="btn btn-primary btn-block"> Realizar Pedido </button>
                 <a href="{% url 'store' %}" class="btn btn-light btn-block">Continua comprando</a>
                 </form>
             </div> <!-- card-body.// -->

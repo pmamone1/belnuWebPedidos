@@ -4,6 +4,7 @@ from category.models import Category
 from accounts.models import Account
 from django.db.models import Avg, Count
 from django.urls import reverse
+import computed_property
 
 
 # Create your models here.
@@ -15,7 +16,7 @@ class Product(models.Model):
     recargo_interior = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='Recargo Interior')
     porcentaje_vv = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='% Vendedor')
     images = models.ImageField(upload_to='photos/products',blank=True,verbose_name='Imagen')
-    stock = models.IntegerField(verbose_name='Stock')
+    stock = computed_property.ComputedIntegerField(compute_from='stock_total',verbose_name="Stock")
     is_available = models.BooleanField(default=True,verbose_name='Disponible')
     category = models.ForeignKey(Category,on_delete=models.CASCADE,verbose_name='Categoria')
     created_date = models.DateField(auto_now_add=True,verbose_name='Fecha de creacion')
@@ -27,17 +28,22 @@ class Product(models.Model):
         ordering = ['product_name', '-created_date']
         
 
-        
+    @property    
     def stock_total(self,stock=0):
-        #product.variation_set.edicion
-        all_variations = Variation.objects.all().filter(product=self.id,variation_category='Edicion')        
+        ediciones = Variation.objects.all().filter(product=self.id)        
+        print("cant de ediciones encontradas:"+ str(ediciones.count()))
         
-        for variation in all_variations:
-            print("el stock es "+ str(variation.stock))
-            stock += variation.stock
-            if stock is not None:
-                return stock  
-        return 0
+        for x in ediciones:
+            print("titulo: ", str(x.id))
+            print("titulo", x.product.product_name)
+            print("edicion: ", x.variation_value)
+            print("el stock es "+ str(x.stock))
+            
+            stock += x.stock
+        
+        if stock is not None:
+                return stock      
+        
             
     
     def get_url(self):

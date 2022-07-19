@@ -1,7 +1,8 @@
+from telnetlib import STATUS
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import RegistrationForm, UserProfileForm, UserForm
 from .models import Account, UserProfile
-from orders.models import Order
+from orders.models import Order, OrderProduct
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
@@ -10,6 +11,9 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.core.mail import EmailMessage
+from django.core.paginator import Paginator
+from django.db.models import Q
+
 
 import smtplib
 import ssl
@@ -226,7 +230,10 @@ def activate(request, uidb64, token):
 
 @login_required(login_url='login')
 def dashboard(request):
-    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    if not request.user.is_admin:
+        orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    else:
+        orders = Order.objects.order_by('-created_at').filter(is_ordered=True)
     orders_count = orders.count()
 
     userprofile = UserProfile.objects.get(user_id=request.user.id)
@@ -319,11 +326,61 @@ def resetPassword(request):
 
 
 def my_orders(request):
-    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    if not request.user.is_admin:
+        orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    else:
+        orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
+        
+    paginator = Paginator(orders, 5)
+    page = request.GET.get('page')
+    paged_products = paginator.get_page(page)
+    product_count = orders.count()
+        
     context = {
-        'orders': orders,
+        'product_count': product_count,
+        'orders': paged_products,
     }
+     
     return render(request, 'accounts/my_orders.html', context)
+
+def borrar_pedido(request, pk):
+    order = Order.objects.get(pk=pk)
+    if order.status =="Aceptado":
+        order.status ="Cancelado"
+        order.save()
+        messages.success(request, 'El pedido se cancelo correctamente, se enviara un email al vendedor')
+        current_site = get_current_site(request)
+
+        # Configuracion de los mails
+        email_sender = 'belnu.pedidos@gmail.com'
+        email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+        email_receiver = order.email
+
+        # configuramos el mail 
+        subject = 'Tu pedido fue Cancelado!'
+        body = render_to_string('accounts/borrar_pedido_email.html', {
+                'user': order.user,
+                'domain': current_site,
+                'order':order,
+            })
+
+        em = EmailMessage()
+        em['From'] = email_sender
+        em['To'] = email_receiver
+        em['Subject'] = subject
+        em.set_content(body)
+
+        # Add SSL (layer of security)
+        context = ssl.create_default_context()
+
+        # Log in and send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(email_sender, email_password)
+            smtp.sendmail(email_sender, email_receiver, em.as_string())
+        return redirect('my_orders')
+
+
+
 
 @login_required(login_url='login')
 def edit_profile(request):
@@ -379,3 +436,21 @@ def change_password(request):
             return redirect('change_password')
 
     return render(request, 'accounts/change_password.html')
+
+def selected_order(request, order_id):
+    order = Order.objects.get(id=order_id)
+    order_product_id = OrderProduct.objects.filter(order=order)
+
+    paginator = Paginator(order_product_id, 3)
+    page = request.GET.get('page')
+    paged_products = paginator.get_page(page)
+    product_count = order_product_id.count()
+    
+    context = {
+        'order': order,
+        'order_product': paged_products,
+        'product_count': product_count,
+        'order_p': paged_products,    
+        'fecha': order.created_at,
+        }
+    return render(request, 'accounts/selected_order.html', context)

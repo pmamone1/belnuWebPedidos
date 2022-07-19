@@ -9,13 +9,13 @@ class Order(models.Model):
         ('New', 'Nuevo'),
         ('Accepted', 'Aceptado'),
         ('Completed', 'Completado'),
-        ('Cancelled', 'Cancelado'),
+        ('Cancelado', 'Cancelado'),
     )
 
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True,verbose_name='Usuario')
     numero_vendedor = models.IntegerField(blank=True,verbose_name='Numero de vendedor',null=True)
     nombre_vendedor = models.CharField(blank=True,max_length=50,verbose_name='Nombre de vendedor',null=True)
-    order_number = models.CharField(max_length=20,verbose_name='Numero de Pedido')
+    order_number = models.CharField(max_length=30,verbose_name='Numero de Pedido')
     first_name = models.CharField(max_length=50,verbose_name='Nombre')
     last_name = models.CharField(max_length=50,verbose_name='Apellido')
     phone = models.CharField(max_length=50,verbose_name='Telefono',blank=True)
@@ -28,12 +28,19 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True,verbose_name='Fecha de creacion')
     updated_at = models.DateTimeField(auto_now=True,verbose_name='Fecha de actualizacion')
 
+    def status_verbose(self):
+        return dict(Order.STATUS)[self.status]
+    
     def full_name(self):
         return f'{self.last_name}, {self.first_name}'
 
+
+    def full_vendedor(self):
+        return f'( {self.numero_vendedor} - {self.nombre_vendedor} ) --> Pedido # {self.order_number}'
+
     
     def __str__(self):
-        return self.first_name
+        return self.full_vendedor()
 
     class Meta:
         verbose_name = "Pedido"
@@ -50,7 +57,7 @@ class OrderProduct(models.Model):
     ordered = models.BooleanField(default=False,verbose_name='Ordenado')
     created_at = models.DateTimeField(auto_now_add=True,verbose_name='Fecha de creacion')
     updated_at = models.DateTimeField(auto_now=True,verbose_name='Fecha de actualizacion')
-    numero_pedido = models.CharField(max_length=20,verbose_name='Numero de Pedido',blank=True,null=True)
+    numero_pedido = models.CharField(max_length=30,verbose_name='Numero de Pedido',blank=True,null=True)
     
     def __str__(self):
         return self.product.product_name

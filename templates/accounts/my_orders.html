@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block content %}
 
 
@@ -15,7 +14,7 @@
         <main class="col-md-9">
             <article class="card">
             <header class="card-header">
-                <strong class="d-inline-block mr-3"> Ordenes de compra </strong>
+                <strong class="d-inline-block mr-2"> Pedidos Realizados </strong>
             </header>
             <div class="card-body">
                 <div class="row">
@@ -24,25 +23,47 @@
                           <table class="table table-hover">
                               <thead>
                                 <tr>
-                                  <th scope="col"># Orden</th>
-                                  <th scope="col">Nombre Facturacion</th>
-                                  <th scope="col">Telefono</th>
-                                  <th scope="col">Total Orden</th>
-                                  <th scope="col">Fecha</th>
+                                  <th scope="col"># Pedido</th>
+                                  <th scope="col" style="text-align:center;">Numero Vendedor</th>
+                                  
+                                  <th scope="col">Total Pedido</th>
+                                  <th scope="col" style="width:30px;padding:30px">Fecha</th>
+                                  <th scope="col">Estado</th>
+                                  {% if user.is_admin %}
+                                  <th scope="col" style="text-align:center;">Cancelar Pedido</th>
+                                  {% endif %}
                                 </tr>
                               </thead>
                               <tbody>
-                                  {% for order in orders %}
+                                  
+                                      {% for order in orders %}
                                       <tr>
-                                        <th scope="row">{{ order.order_number }}</th>
-                                        <td>{{order.full_name}}</td>
-                                        <td>{{order.phone}}</td>
+                                        <th scope="row"><a href="{% url 'selected_order' order.id %}">{{ order.order_number }}</a></th>
+                                        <td style="text-align:center; color:green;"><strong>{{order.numero_vendedor}}</strong></td>
+                                        
                                         <td>${{order.order_total}}</td>
-                                        <td>{{order.created_at}}</td>
+                                        <td>{{order.created_at|date:"d-m-y" }}</td>
+                                        <td>{{ order.status_verbose }}</td>
+                                        
+                                        {% if user.is_admin  %}
+                                        {% if order.status == 'Accepted' %}
+                                        <form action="{% url 'borrar_pedido' order.id %}" method="POST">
+                                          {% csrf_token %}
+                                        <td style="text-align:center;"><button class="btn btn-danger">x</butto></td>
+                                          
+                                          </form
+                                        {% endif %}
+                                        {% endif %}
+                                      
                                       </tr>
-                                  {% endfor %}
+                                      
+                                      {% endfor %}
+                                      
                               </tbody>
-                          </table>
+                              
+                      
+                
+                            </table>
 
 
                     </div>
@@ -52,12 +73,46 @@
 
 
                 </div> <!-- row.// -->
+                <nav class="mt-4" aria-label="Page navigation sample">
+
+                    {% if orders.has_other_pages %}
+                    <ul class="pagination">
+          
+                      {% if orders.has_previous %}
+                      <li class="page-item"><a class="page-link" href="?page={{orders.previous_page_number}}">Anterior</a></li>
+                      {% else %}
+                      <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                      {% endif %}
+          
+                      {% for i in orders.paginator.page_range %}
+          
+                        {% if orders.number == i %}
+                          <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
+                        {% else %}
+                          <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                        {% endif %}
+          
+                      {% endfor %}
+          
+                      {% if orders.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{orders.next_page_number}}">Siguiente</a></li>
+                      {% else %}
+                        <li class="page-item disabled"><a class="page-link" href="#">Siguiente</a></li>
+                      {% endif %}
+          
+                    </ul>
+                    {% endif %}
+          
+                  </nav>
+                
             </div> <!-- card-body .// -->
 
             </article> <!-- order-group.// -->
-        </main>
+
+                    </main>
     </div> <!-- row.// -->
-    </div>
+
+</div>
 
 
     </section>

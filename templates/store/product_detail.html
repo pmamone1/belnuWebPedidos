@@ -71,7 +71,7 @@
                   <h6>Seleccione Edición</h6>
                   <select class="form-control" id="edicion" name="edicion" required>
                     <option value="" disabled selected>Seleccione</option>
-                    {% for i in single_product.variation_set.edicion %}
+                    {% for i in single_product.variation_set.edicion  %}
                     {% if edicion.variation_value == i.variation_value %}
                     <option value="{{ i.variation_value | lower }}" selected>{{ i.variation_value | capfirst }}</option>
                     {% else %}
@@ -97,15 +97,10 @@
               </div>  row.// 
 -->
               <hr>
-
-              {% if single_product.stock_total <= 0 %}
-              <h5 style="color:red; font-size:0.9em;">Producto fuera de stock</h5>
-              {% elif single_product.stock_total > 0 and single_product.stock_total < 6  %}
-              <h5 style="color:blue; font-size:0.9em;">Quedan {{ single_product.stock_total }} en stock</h5>
-              <button type="submit"  class="btn  btn-primary"> <span class="text">Agregar al Carrito</span> <i class="fas fa-shopping-cart"></i>  </button>
-                {% else %}
-                  <button type="submit"  class="btn  btn-primary"> <span class="text">Agregar al Carrito</span> <i class="fas fa-shopping-cart"></i>  </button>
-                {% endif %}
+              <h5 id="sin_stock" style="color:red; font-size:0.9em;"></h5>
+              <h5 id="poco_stock" style="color:blue; font-size:0.9em;"></h5>
+              
+              <button id="carrito" type="submit"  class="btn  btn-primary"> <span class="text">Agregar al Carrito</span> <i class="fas fa-shopping-cart"></i>  </button>
               
             </article> <!-- product-info-aside .// -->
 
@@ -246,7 +241,7 @@ $("#edicion").change(function (e) {
   //alert("titulo="+titulo)
   var urls="http://127.0.0.1:8000/store/get_ajax_titulo/"
   var url = new URL(urls),
-    params = {titulo:titulo, edicion:edicion}
+    params = {titulo:titulo, edicion:edicion};
 Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
   //alert(url);
 
@@ -267,6 +262,21 @@ Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
   var img = document.getElementById('imagen_ed')
   img.src = content.data.image;  
   console.log("stock="+content.data.stock);
+  document.getElementById('poco_stock').innerHTML="Quedan "+ content.data.stock +" en stock";
+  document.getElementById('sin_stock').innerHTML="Producto fuera de stock";
+  if (content.data.stock <= 0) {
+    document.getElementById('carrito').hidden=true;
+    document.getElementById('sin_stock').hidden=false;
+    document.getElementById('poco_stock').hidden=true;
+  }else if (content.data.stock > 0 && content.data.stock < 6 ) {
+    document.getElementById('carrito').hidden=false;
+    document.getElementById('sin_stock').hidden=true;
+    document.getElementById('poco_stock').hidden=false;
+  }else{
+    document.getElementById('carrito').hidden=false;
+    document.getElementById('sin_stock').hidden=true;
+    document.getElementById('poco_stock').hidden=true;
+  }
 });
 
 });

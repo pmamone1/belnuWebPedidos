@@ -16,7 +16,11 @@
             <article class="card">
             <header class="card-header">
                 <strong class="d-inline-block mr-3"> Sesion iniciada de:  </strong>
-                <span>  {{ user.full_name }}  </span>
+                <span>  {{ user.full_name }} --- {{userprofile.numero_vendedor}}-{{userprofile.nombre_vendedor}} </span>
+                {% if user.is_admin %}
+                <span style="color:#1D521C;margin-left:25px; background-color:#7CCD7B; padding:5px;"><strong> Administrador</strong> </span>
+                {% endif %}
+                
             </header>
             <div class="card-body">
                 <div class="row">
@@ -24,9 +28,9 @@
                     <div class="col-md-6">
                         <div class="card" style="text-align:center;">
                             <div class="card-body">
-                              <h5 class="card-title">Total de Ordenes</h5>
+                              <h5 class="card-title">Total de Pedidos</h5>
                               <h4>{{ orders_count }}</h4>
-                              <a href="{% url 'my_orders' %}">Ver Ordenes</a>
+                              <a href="{% url 'my_orders' %}">Ver Pedidos</a>
                             </div>
                         </div>
                     </div>

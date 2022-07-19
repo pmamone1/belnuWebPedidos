@@ -6,11 +6,21 @@ from .forms import OrderForm
 from datetime import datetime
 from .models import Order, OrderProduct
 import json
-from store.models import Product
+from store.models import Product, Variation
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from accounts.models import UserProfile
-
+from django.contrib.sites.shortcuts import get_current_site
+import smtplib
+import ssl
+from email.message import EmailMessage
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.contrib import messages, auth
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.contrib.sites.shortcuts import get_current_site
 
 
 # Create your views here.
@@ -105,9 +115,16 @@ def place_order(request, total=0, quantity=0):
             print(product_variation)
             orderproduct.save()
 
-            product = Product.objects.get(id=item.product_id)
-            product.stock -= item.quantity
-            product.save()
+            # bajar del stock los ejemplares vendidos
+            for variation in product_variation:
+                variation.stock -= item.quantity
+                if variation.stock < 0:
+                    messages.warning(request, "No hay suficientes ejemplares para el producto: " + variation.subtitulo)
+                    return redirect('cart')
+                    
+                else:
+                    variation.save()   
+                print("bajamos del stock el producto")
         CartItem.objects.filter(user=request.user).delete()
         data.is_ordered = True
         data.status ="Accepted"
@@ -115,6 +132,9 @@ def place_order(request, total=0, quantity=0):
         data.save()
         print("borramos el carrito y se guardo todo!")
         context = {
+            'user': user,
+            'user_id': str(user.id),
+            'user_email': user.email,
             'grand_total': str(grand_total),
             'numero_vendedor': numero_vendedor,
             'nombre_vendedor': nombre_vendedor,
@@ -123,13 +143,12 @@ def place_order(request, total=0, quantity=0):
             'status': data.status,
             'fecha': str(data.created_at),
         }
-        return redirect('order_complete', grand_total=grand_total, numero_vendedor=numero_vendedor, nombre_vendedor=nombre_vendedor, nombre_completo=current_user.first_name + ", " + current_user.last_name, numero_pedido=order_number, status=data.status, fecha=data.created_at)   
+        return redirect('order_complete', user_id=str(user.id),user_email=user.email, user=user, grand_total=grand_total, numero_vendedor=numero_vendedor, nombre_vendedor=nombre_vendedor, nombre_completo=current_user.first_name + ", " + current_user.last_name, numero_pedido=order_number, status=data.status, fecha=data.created_at)   
             
        
        
        
     context = {
-            'user': user,
             'cart_items': cart_items,
             'grand_total': grand_total,
             'numero_vendedor': numero_vendedor,
@@ -137,12 +156,14 @@ def place_order(request, total=0, quantity=0):
             'fecha_pedido': datetime.now().strftime("%Y-%m-%d"),
             'order_number': order_number,
             'total_items':quantity,
+            'user': current_user,
         }
     return render(request,'store/checkout.html',context)
 
 
 
-def order_complete(request,numero_vendedor,grand_total,nombre_vendedor,nombre_completo,numero_pedido,status,fecha):
+def order_complete(request,user,user_id,user_email,numero_vendedor,grand_total,nombre_vendedor,nombre_completo,numero_pedido,status,fecha):
+    domain = get_current_site(request).domain
     try:
         order = Order.objects.get(order_number=numero_pedido, is_ordered=True)
         ordered_products = OrderProduct.objects.filter(order_id=order.id)
@@ -150,16 +171,62 @@ def order_complete(request,numero_vendedor,grand_total,nombre_vendedor,nombre_co
         pass
     print(ordered_products)
     print(ordered_products.count())
+    
     context = {
             'ordered_products': ordered_products,
             'grand_total': str(grand_total),
             'numero_vendedor': numero_vendedor,
             'nombre_vendedor': nombre_vendedor,
-            'nombre_completo': nombre_completo,
-            'fecha_pedido': fecha,
             'numero_pedido': numero_pedido,
-            'nombre_completo': nombre_completo,
+            'status': status,
+            'domain': domain,
+            'order_id': order.id,
+        }
+    current_site = get_current_site(request)
+
+    # Configuracion de los mails
+    email_sender = 'belnu.pedidos@gmail.com'
+    email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+    
+    email_receiver = user_email
+
+    # configuramos el mail 
+    subject = 'Su pedido fue procesado con exito! - Gracias por hacer tus pedidos en Belnu Pedidos Web!'
+    body = render_to_string('orders/order_complete_email.html', {
+    'user': user,
+    'domain': current_site,
+    'nombre_completo': nombre_completo,
+    'numero_pedido': numero_pedido,
+    'status': status,
+    'nombre_vendedor': nombre_vendedor,
+    'numero_vendedor': numero_vendedor,
+    'grand_total': str(grand_total),
+    'order_id': order.id,
+    })
+
+    em = EmailMessage()
+    em['From'] = email_sender
+    em['To'] = email_receiver
+    em['Subject'] = subject
+    em.set_content(body)
+
+    # Add SSL (layer of security)
+    context_ssl = ssl.create_default_context()
+
+    # Log in and send the email
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context_ssl) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.sendmail(email_sender, email_receiver, em.as_string())
+        messages.success(request, 'Tu pedido fue procesado con exito!')        
+    return render(request,'orders/order_recieved_email.html',context)
+
+def order_recived_email(request,ordered_products,grand_total,numero_vendedor,nombre_vendedor,numero_pedido,status):
+    context = {
+            'ordered_products': ordered_products,
+            'grand_total': str(grand_total),
+            'numero_vendedor': numero_vendedor,
+            'nombre_vendedor': nombre_vendedor,
+            'numero_pedido': numero_pedido,
             'status': status,
         }
-        
-    return render(request, 'orders/order_complete.html', context)
+    return render(request,'orders/order_recived_email.html',context)
