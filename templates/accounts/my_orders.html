@@ -32,7 +32,7 @@
               <span style="margin-left:5vw;">Filtrar Pedidos:</span>
               
                 <span><select id="filtro" name="filtro" style="border-radius:10px;padding:3px;margin-left:2px;">
-                  <option value="0">{{filtro}}</option>
+                  <option id="op0" value="0">{{filtro}}</option>
                   <option id="1" value="1">Todos</option>
                   <option id="2" value="2">Pendientes</option>
                   <option id="3" value="3">Enviados</option>
@@ -41,7 +41,14 @@
                 </span>
                 <span><button id="boton_filtro" type="submit" class="btn btn-success" style="width:80px;border-radius:15px;padding:5px;margin-left:5px;" disabled>Filtrar</button></span>
               </form>
-
+              {% if users.is_admin %}
+              <hr>
+              <div class="container">
+                <form action="{% url 'cumplir_pedidos' %}" method="POST">
+                  {% csrf_token %}    
+                <button type="submit" id="btn" class="btn btn-outline-success" disabled="true">Cumplir Pedidos Aceptados</button>
+              </div>
+              {% endif %}
             </header>
             <div class="card-body">
                 <div class="row">
@@ -153,7 +160,16 @@
     <script>
       var boton_filtro = document.getElementById("boton_filtro");
       var filtro = document.getElementById("filtro");
-      boton_filtro.addEventListener("click", modifyText);
+      var button = document.getElementById("btn");
+      var op0 = document.getElementById("op0");
+
+      $( document ).ready(function() {
+        if(op0.innerHTML =="Pendientes"){
+          button.disabled = false;
+        }
+    });
+
+      boton_filtro.addEventListener("change", modifyText);
      
       filtro.addEventListener("click", activarBoton);
 
@@ -164,7 +180,7 @@
         }
       }
       function modifyText() {
-        
+        alert("filtro"+str(filtro))
         if(filtro==1){
           $("#1").attr("selected", "selected");
           $("#titulo_pedidos").text("Todos los Pedidos");
@@ -172,6 +188,7 @@
         if(filtro==2){
           document.getElementById("2").classList.add = "selected";
           $("#titulo_pedidos").text("Pedidos Pendientes");
+          button.disabled = false;
         }
         if(filtro==3){
           document.getElementById("3").classList.add = "selected";

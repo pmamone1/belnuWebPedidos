@@ -536,3 +536,10 @@ def selected_order(request, order_id):
         'fecha': order.created_at,
         }
     return render(request, 'accounts/selected_order.html', context)
+
+def cumplir_pedidos(request):
+    order = Order.objects.filter(status="Accepted")
+    for item in order:
+        item.status = "Completed"
+        item.save()
+    return redirect('my_orders')

@@ -18,5 +18,6 @@ urlpatterns = [
     path('borrar_pedido/<int:pk>/', views.borrar_pedido, name='borrar_pedido'),
     path('filtrar_pedido/', views.filtrar_pedido, name='filtrar_pedido'),
     path('filtrar_pedido/<str:filtro>/', views.filtrar_pedido, name='filtrar_pedido'),
+    path('cumplir_pedidos/', views.cumplir_pedidos, name='cumplir_pedidos'),
     
 ]
