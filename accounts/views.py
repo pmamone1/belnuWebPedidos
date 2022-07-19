@@ -1,4 +1,6 @@
+from datetime import datetime
 from telnetlib import STATUS
+from django.http import FileResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import RegistrationForm, UserProfileForm, UserForm
 from .models import Account, UserProfile
@@ -14,8 +16,10 @@ from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .serializers import OrderSerializer
-from django.shortcuts import HttpResponse
+#from django.shortcuts import HttpResponse
+from django.http import HttpResponse 
 import json
+import xlwt
 
 import smtplib
 import ssl
@@ -537,9 +541,66 @@ def selected_order(request, order_id):
         }
     return render(request, 'accounts/selected_order.html', context)
 
+
+
 def cumplir_pedidos(request):
+    messages.success(request, 'Se exporto a excel los pedidos!')
     order = Order.objects.filter(status="Accepted")
     for item in order:
         item.status = "Completed"
         item.save()
+    
     return redirect('my_orders')
+    
+
+
+def exporta_pedidos_xls(request):
+    messages.success(request, 'Se exporto a excel los pedidos!')
+    print("entro al exportador")
+    response = HttpResponse(content_type='application/ms-excel')
+    
+    response['Content-Disposition'] = 'attachment; filename="Pedidos.xls"'
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Pedidos')
+
+    # Sheet header, first row
+    row_num = 0
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    columns = ['Vendedor','Nombre Vendedor','Producto','Edicion','Cantidad','# Pedido', ]
+
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+
+    # Sheet body, remaining rows
+    font_style = xlwt.XFStyle()
+    order=Order.objects.filter(status="Accepted")
+    for item in order:
+        rows = OrderProduct.objects.filter(order=item).values_list('profile__numero_vendedor', 'profile__nombre_vendedor', 'product__product_name', 'variation__variation_value', 'quantity', 'numero_pedido')
+        for row in rows:
+            print(row)
+            row_num += 1
+            for col_num in range(len(row)):
+                ws.write(row_num, col_num, row[col_num], font_style)
+
+    # Darle estilo al archivo XLS
+    estilo = xlwt.XFStyle()
+    estilo.alignment.horz = 'HORZ_CENTER'  
+    
+    bordes = estilo.borders
+    estilo.pattern_back_colour = 41
+    
+    wb.save(response)
+    print(response)
+    print("se guardo el archivo!")
+    
+    order = Order.objects.filter(status="Accepted")
+    for item in order:
+        item.status = "Completed"
+        item.save()
+    
+    return response
+    

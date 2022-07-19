@@ -42,12 +42,14 @@
                 <span><button id="boton_filtro" type="submit" class="btn btn-success" style="width:80px;border-radius:15px;padding:5px;margin-left:5px;" disabled>Filtrar</button></span>
               </form>
               {% if users.is_admin %}
+              {% if orders %}
               <hr>
               <div class="container">
-                <form action="{% url 'cumplir_pedidos' %}" method="POST">
+                <form action="{% url 'exporta_pedidos_xls' %}" method="POST">
                   {% csrf_token %}    
                 <button type="submit" id="btn" class="btn btn-outline-success" disabled="true">Cumplir Pedidos Aceptados</button>
               </div>
+              {% endif %}
               {% endif %}
             </header>
             <div class="card-body">

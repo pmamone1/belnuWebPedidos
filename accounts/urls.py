@@ -19,5 +19,6 @@ urlpatterns = [
     path('filtrar_pedido/', views.filtrar_pedido, name='filtrar_pedido'),
     path('filtrar_pedido/<str:filtro>/', views.filtrar_pedido, name='filtrar_pedido'),
     path('cumplir_pedidos/', views.cumplir_pedidos, name='cumplir_pedidos'),
+    path('exporta_pedidos_xls/', views.exporta_pedidos_xls, name='exporta_pedidos_xls'),
     
 ]
