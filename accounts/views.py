@@ -233,9 +233,9 @@ def activate(request, uidb64, token):
 @login_required(login_url='login')
 def dashboard(request):
     if not request.user.is_admin:
-        orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+        orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True,status="Accepted")
     else:
-        orders = Order.objects.order_by('-created_at').filter(is_ordered=True)
+        orders = Order.objects.order_by('-created_at').filter(is_ordered=True,status="Accepted")
     orders_count = orders.count()
 
     userprofile = UserProfile.objects.get(user_id=request.user.id)
@@ -243,6 +243,7 @@ def dashboard(request):
     context = {
         'orders_count': orders_count,
         'userprofile': userprofile,
+        'users':request.user,
     }
 
     return render(request, 'accounts/dashboard.html', context)
@@ -326,41 +327,53 @@ def resetPassword(request):
     else:
         return render(request, 'accounts/resetPassword.html')
 
-def filtrar_pedido(request):
-    if request.method == 'POST':
+def filtrar_pedido(request,filtro="1"):
+    if request.POST:
         filtro= request.POST.get('filtro')
-        print(filtro)
-        print(request.user)
-        profile=UserProfile.objects.get(user_id=request.user.id)
-        if not request.user.is_admin:
-            try:    
-                if filtro =="1":
-                    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-                elif filtro =="2":
-                    orders = Order.objects.filter(user=request.user,is_ordered=True,status="Accepted").order_by('-created_at')
-                elif filtro =="3":
-                    orders = Order.objects.filter(user=request.user,is_ordered=True,status="Completed").order_by('-created_at')
-                elif filtro =="4":
-                    orders = Order.objects.filter(user=request.user,is_ordered=False,status="Cancelado").order_by('-created_at')
+    #print("*******POST***********"+str(filtro))
+    
+    
+    print("*******GET***********"+str(filtro))
+    if filtro==None:
+        filtro="1"
+        print("Filtro hardcodeado: "+str(filtro))
+    print(request.user)
+    profile=UserProfile.objects.get(user_id=request.user.id)
+    if not request.user.is_admin:
+        print("no es admin")
+        try:    
+            if filtro =="1":
+                orders = Order.objects.filter(user=request.user).order_by('-created_at')
+            elif filtro =="2":
+                orders = Order.objects.filter(user=request.user,is_ordered=True,status="Accepted").order_by('-created_at')
+            elif filtro =="3":
+                orders = Order.objects.filter(user=request.user,is_ordered=True,status="Completed").order_by('-created_at')
+            elif filtro =="4":
+                orders = Order.objects.filter(user=request.user,is_ordered=False,status="Cancelado").order_by('-created_at')
             
-            except:
-                pass
-        else:
-            try:    
-                if filtro =="1":
-                    orders = Order.objects.all().order_by('-created_at')
-                elif filtro =="2":
-                    orders = Order.objects.filter(is_ordered=True,status="Accepted").order_by('-created_at')
-                elif filtro =="3":
-                    orders = Order.objects.filter(is_ordered=True,status="Completed").order_by('-created_at')
-                elif filtro =="4":
-                    orders = Order.objects.filter(is_ordered=False,status="Cancelado").order_by('-created_at')
+        except:
+            print("hay un error")
+            pass
+    else:
+        print("es admin")
+        try:    
+            if filtro =="1":
+                orders = Order.objects.all().order_by('-created_at')
+            elif filtro =="2":
+                orders = Order.objects.filter(is_ordered=True,status="Accepted").order_by('-created_at')
+            elif filtro =="3":
+                orders = Order.objects.filter(is_ordered=True,status="Completed").order_by('-created_at')
+            elif filtro =="4":
+                orders = Order.objects.filter(is_ordered=False,status="Cancelado").order_by('-created_at')
             
-            except:
-                pass
-        
-    paginator = Paginator(orders, 5)
+        except:
+            print("Hay un error")
+            pass
     page = request.GET.get('page')
+    print("filtro? "+str(filtro))
+    print("pagina? " + str(page))
+    
+    paginator = Paginator(orders, 5)
     paged_products = paginator.get_page(page)
     product_count = orders.count()
     
@@ -375,20 +388,19 @@ def filtrar_pedido(request):
     print("el filtro que esta pasando es =" +filtro)
     
     context = {
-        'product_count': product_count,
-        'orders': paged_products,
-        'filtro': filtro,
-        'user': profile,
-    }
+            'product_count': product_count,
+            'orders': paged_products,
+            'filtro': filtro,
+            'user': profile,
+            'users':request.user,
+        }
      
     return render(request, 'accounts/my_orders.html', context)
     
-    
-
 
 def my_orders(request):
     if not request.user.is_admin:
-        orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+        orders = Order.objects.filter(user=request.user, is_ordered=True,status="Accepted").order_by('-created_at')
     else:
         orders = Order.objects.all().filter(status="Accepted").order_by('-created_at')
         
@@ -396,10 +408,13 @@ def my_orders(request):
     page = request.GET.get('page')
     paged_products = paginator.get_page(page)
     product_count = orders.count()
-        
+    profile=UserProfile.objects.get(user_id=request.user.id)
+    
     context = {
         'product_count': product_count,
         'orders': paged_products,
+        'users':request.user,
+        'user': profile,
     }
      
     return render(request, 'accounts/my_orders.html', context)
@@ -470,6 +485,7 @@ def edit_profile(request):
         'userprofile': userprofile,
         'numero_vendedor': vendedor.numero_vendedor,
         'nombre_vendedor': vendedor.nombre_vendedor,
+        'users':request.user,
     }
 
     return render(request, 'accounts/edit_profile.html', context)
@@ -498,8 +514,10 @@ def change_password(request):
         else:
             messages.error(request, 'El password no coincide con la confirmacion de password')
             return redirect('change_password')
-
-    return render(request, 'accounts/change_password.html')
+    context={
+            'users':request.user,
+    }
+    return render(request, 'accounts/change_password.html',context)
 
 def selected_order(request, order_id):
     order = Order.objects.get(id=order_id)

@@ -16,9 +16,9 @@
             <header class="card-header">
               <form action="{% url 'filtrar_pedido' %}" method="POST">
                 {% csrf_token %}
-                {% if user.is_admin %}
-              {% if filtro == 'Todos' %}
-                <strong class="d-inline-block mr-2" id="titulo_pedidos">Mostrar {{ filtro }} los Pedidos</strong>
+                {% if users.is_admin %}
+                  {% if filtro == 'Todos' %}
+                    <strong class="d-inline-block mr-2" id="titulo_pedidos">Mostrar {{ filtro }} los Pedidos</strong>
               {% else %}
                 <strong class="d-inline-block mr-2" id="titulo_pedidos">Mostrar pedidos {{ filtro }}</strong>
               {% endif %}
@@ -70,8 +70,14 @@
                                         
                                         <td>${{order.order_total}}</td>
                                         <td>{{order.created_at|date:"d-m-y" }}</td>
-                                        <td>{{ order.status_verbose }}</td>
-                                        
+                                        {% if order.status == 'Accepted' %}
+                                          <td style="color:blue;">{{ order.status_verbose }}</td>
+                                        {% elif order.status == 'Cancelado' %}
+                                          <td style="color:red;">{{ order.status_verbose }}</td>
+                                          {% elif order.status == 'Completed' %}
+                                          <td style="color:green;">{{ order.status_verbose }}</td>
+                                          {% endif%}
+
                                         {% if user.is_admin  %}
                                         {% if order.status == 'Accepted' %}
                                         <form action="{% url 'borrar_pedido' order.id %}" method="POST">
