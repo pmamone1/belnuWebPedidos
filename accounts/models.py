@@ -88,7 +88,7 @@ class UserProfile(models.Model):
     state = models.CharField(blank=True, max_length=20,verbose_name='Provincia')
     country = models.CharField(blank=True, max_length=20,verbose_name='Pais')
     numero_vendedor = models.IntegerField(blank=True,verbose_name='Numero de vendedor',unique=True,null=True)
-    nombre_vendedor = models.CharField(blank=True,max_length=50,verbose_name='Nombre de vendedor',unique=True,null=True)
+    nombre_vendedor = models.CharField(blank=True,max_length=10,verbose_name='Nombre de vendedor',unique=True,null=True)
     
     def __str__(self):
         return self.full_name() + ' - ' + str(self.numero_vendedor) + ' - ' + self.nombre_vendedor

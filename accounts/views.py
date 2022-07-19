@@ -330,19 +330,35 @@ def filtrar_pedido(request):
     if request.method == 'POST':
         filtro= request.POST.get('filtro')
         print(filtro)
-    try:    
-        if filtro =="1":
-            orders = Order.objects.all().order_by('-created_at')
-        elif filtro =="2":
-            orders = Order.objects.filter(is_ordered=True,status="Accepted").order_by('-created_at')
-        elif filtro =="3":
-            orders = Order.objects.filter(is_ordered=True,status="Completed").order_by('-created_at')
-        elif filtro =="4":
-            orders = Order.objects.filter(is_ordered=False,status="Cancelado").order_by('-created_at')
+        print(request.user)
+        profile=UserProfile.objects.get(user_id=request.user.id)
+        if not request.user.is_admin:
+            try:    
+                if filtro =="1":
+                    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+                elif filtro =="2":
+                    orders = Order.objects.filter(user=request.user,is_ordered=True,status="Accepted").order_by('-created_at')
+                elif filtro =="3":
+                    orders = Order.objects.filter(user=request.user,is_ordered=True,status="Completed").order_by('-created_at')
+                elif filtro =="4":
+                    orders = Order.objects.filter(user=request.user,is_ordered=False,status="Cancelado").order_by('-created_at')
+            
+            except:
+                pass
+        else:
+            try:    
+                if filtro =="1":
+                    orders = Order.objects.all().order_by('-created_at')
+                elif filtro =="2":
+                    orders = Order.objects.filter(is_ordered=True,status="Accepted").order_by('-created_at')
+                elif filtro =="3":
+                    orders = Order.objects.filter(is_ordered=True,status="Completed").order_by('-created_at')
+                elif filtro =="4":
+                    orders = Order.objects.filter(is_ordered=False,status="Cancelado").order_by('-created_at')
+            
+            except:
+                pass
         
-    except:
-        pass
-    
     paginator = Paginator(orders, 5)
     page = request.GET.get('page')
     paged_products = paginator.get_page(page)
@@ -362,6 +378,7 @@ def filtrar_pedido(request):
         'product_count': product_count,
         'orders': paged_products,
         'filtro': filtro,
+        'user': profile,
     }
      
     return render(request, 'accounts/my_orders.html', context)
