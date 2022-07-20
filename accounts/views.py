@@ -567,7 +567,7 @@ def exporta_pedidos_xls(request):
     # Sheet header, first row
     row_num = 0
 
-    font_style = xlwt.XFStyle()
+    font_style = xlwt.easyxf("pattern: pattern solid, fore_color black; font: color white; align: horiz center; border: left thick, top thick, bottom thick, right thick")
     font_style.font.bold = True
 
     columns = ['Vendedor','Nombre Vendedor','Producto','Edicion','Cantidad','# Pedido', ]
@@ -584,7 +584,7 @@ def exporta_pedidos_xls(request):
             print(row)
             row_num += 1
             for col_num in range(len(row)):
-                ws.write(row_num, col_num, row[col_num], font_style)
+                ws.write(row_num, col_num, row[col_num], xlwt.easyxf("pattern: pattern solid, fore_color white; font: color black; align: horiz center; border: left thin, bottom thin, right thin"))
 
     # Darle estilo al archivo XLS
     estilo = xlwt.XFStyle()
