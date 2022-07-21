@@ -15,7 +15,7 @@ class Order(models.Model):
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True,verbose_name='Usuario')
     numero_vendedor = models.IntegerField(blank=True,verbose_name='Numero de vendedor',null=True)
     nombre_vendedor = models.CharField(blank=True,max_length=50,verbose_name='Nombre de vendedor',null=True)
-    order_number = models.CharField(max_length=30,verbose_name='Numero de Pedido')
+    order_number = models.CharField(max_length=60,verbose_name='Numero de Pedido')
     first_name = models.CharField(max_length=50,verbose_name='Nombre')
     last_name = models.CharField(max_length=50,verbose_name='Apellido')
     phone = models.CharField(max_length=50,verbose_name='Telefono',blank=True)
@@ -47,17 +47,17 @@ class Order(models.Model):
         verbose_name_plural = "Pedidos"
 
 class OrderProduct(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE,verbose_name='Pedido')
-    user = models.ForeignKey(Account, on_delete=models.CASCADE,verbose_name='Usuario')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE,verbose_name='Pedido',null=True)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE,verbose_name='Usuario',null=True)
     profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,null=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto',null=True)
     variation = models.ManyToManyField(Variation, blank=True,verbose_name='Variaciones')
     quantity = models.IntegerField(verbose_name='Cantidad')
     product_price = models.FloatField(verbose_name='Precio')
     ordered = models.BooleanField(default=False,verbose_name='Ordenado')
     created_at = models.DateTimeField(auto_now_add=True,verbose_name='Fecha de creacion')
     updated_at = models.DateTimeField(auto_now=True,verbose_name='Fecha de actualizacion')
-    numero_pedido = models.CharField(max_length=30,verbose_name='Numero de Pedido',blank=True,null=True)
+    numero_pedido = models.CharField(max_length=60,verbose_name='Numero de Pedido',blank=True,null=True)
     
     def __str__(self):
         return self.product.product_name

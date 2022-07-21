@@ -6,7 +6,7 @@ from django.contrib import messages
 from rest_framework import viewsets
 from .serializers import VariationSerializer
 import json
-
+from store.forms import ProductForm
 
 
 from carts.models import CartItem
@@ -101,3 +101,13 @@ def get_ajax_titulo(request):
     #return HttpResponse(serializer.data)
     return HttpResponse(json.dumps({"data":serializer.data}), content_type="application/json")
   
+def nuevo_producto(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Producto creado correctamente!')
+            return redirect('store')
+    else:
+        form = ProductForm()
+    return render(request, 'store/nuevo_producto.html', {'form': form})

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'colorfield',
     'betterforms',
     'computed_property',
+    
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
@@ -79,15 +80,27 @@ WSGI_APPLICATION = 'belnuweb.wsgi.application'
 AUTH_USER_MODEL = 'accounts.Account'
 
 # Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+"""
 
+# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'BelnuWeb',
+        'USER': 'postgres',
+        'PASSWORD': 'pablo1612',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
 
 
 # Password validation

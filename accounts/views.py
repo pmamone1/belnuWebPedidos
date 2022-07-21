@@ -107,7 +107,7 @@ def login(request):
         password = request.POST['password']
 
         user = auth.authenticate(email=email, password=password)
-
+        print("El user es =", user)
         if user is not None:
             print("hay usu")
             try:

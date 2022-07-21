@@ -8,78 +8,101 @@ import computed_property
 
 
 # Create your models here.
+
 class Product(models.Model):
     product_name = models.CharField(max_length=200,unique=True,verbose_name='Nombre Producto')
-    slug = models.SlugField(max_length=200,unique=True)
-    description = models.CharField(max_length=500,blank=True,verbose_name='Descripción')
+    slug = models.SlugField(max_length=200)
+    description = models.CharField(max_length=500,blank=True,verbose_name='Descripción',null=True)
     price = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='PVP')
     recargo_interior = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='Recargo Interior')
     porcentaje_vv = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='% Vendedor')
-    images = models.ImageField(upload_to='photos/products',blank=True,verbose_name='Imagen')
-    stock = computed_property.ComputedIntegerField(compute_from='stock_total',verbose_name="Stock")
+    images = models.ImageField(upload_to='photos/products',verbose_name='Imagen')
+    #stock = computed_property.ComputedIntegerField(compute_from='stock_total',verbose_name="Stock")
+    stock_p=models.IntegerField(verbose_name="Stock_p",default=1)
     is_available = models.BooleanField(default=True,verbose_name='Disponible')
     category = models.ForeignKey(Category,on_delete=models.CASCADE,verbose_name='Categoria')
     created_date = models.DateField(auto_now_add=True,verbose_name='Fecha de creacion')
     modified_date = models.DateField(auto_now=True,verbose_name='Fecha de actualizacion')
     
+
+        
     class Meta:
         verbose_name = "Producto"
         verbose_name_plural = "Productos"
         ordering = ['product_name', '-created_date']
+    
+    
+    def __str__(self):
+        return self.product_name
+    
+    def get_url(self):
+        try:
+            return reverse('product_detail', args=[self.category.slug, self.slug])
+        except:
+            pass
         
-
     @property    
-    def stock_total(self,stock=0):
-        ediciones = Variation.objects.all().filter(product=self.id)        
-        print("cant de ediciones encontradas:"+ str(ediciones.count()))
-        
+    def stock(self,stock=0):
+        ediciones = Variation.objects.filter(product=self.id)        
+        print(ediciones.count())
+        print(ediciones)
+        i=0
         for x in ediciones:
+            i +=1
             print("titulo: ", str(x.id))
             print("titulo", x.product.product_name)
             print("edicion: ", x.variation_value)
             print("el stock es "+ str(x.stock))
-            
+                
             stock += x.stock
-        
+            print("stock parcial:"+str(stock))
+            print(i)
         if stock is not None:
-                return stock      
+            print("el stock total seria="+str(stock))
+            return stock      
+        class Meta:
+            verbose_name = "Stock"   
         
-            
-    
-    def get_url(self):
-        return reverse('product_detail', args=[self.category.slug, self.slug])
-
-    def __str__(self):
-        return self.product_name
 
     @property
     def pvp_total(self):
-        return self.price + self.recargo_interior
-    
+        try:
+            return self.price + self.recargo_interior
+        except:
+            pass
+        
     @property
     def precio_vv(self):
-        return (self.price*self.porcentaje_vv/100) + self.recargo_interior
-    
+        try:
+            return (self.price*self.porcentaje_vv/100) + self.recargo_interior
+        except:
+            pass
+        
     @property
     def averageReview(self):
-        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
-        avg=0
-        if reviews['average'] is not None:
-            avg = float(reviews['average'])
-        return avg
-
+        try:
+            reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
+            avg=0
+            if reviews['average'] is not None:
+                avg = float(reviews['average'])
+            return avg
+        except:
+            pass
+        
     @property
     def countReview(self):
-        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=Count('id'))
-        count=0
-        if reviews['count'] is not None:
-            count = int(reviews['count'])
+        try:
+            reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=Count('id'))
+            count=0
+            if reviews['count'] is not None:
+                count = int(reviews['count'])
 
-        return count
-
-    
+            return count
+        except:
+            pass
+ 
 class ReviewRating(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     subject = models.CharField(max_length=100, blank=True)
     review = models.CharField(max_length=500, blank=True)
@@ -108,12 +131,12 @@ class VariationManager(models.Manager):
 
 
 class Variation(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto',null=True)
     subtitulo = models.CharField(max_length=100,verbose_name='Subtitulo',blank=True)
     variation_category = models.CharField(max_length=200,verbose_name='Variacion', choices = variation_category_choices,default='Edicion')
     variation_value = models.CharField(max_length=200,verbose_name='Edicion')
     stock = models.IntegerField(verbose_name='Stock')
-    image = models.ImageField(upload_to='photos/products',blank=True,verbose_name='Imagen',null=True)
+    image = models.ImageField(upload_to='photos/products',blank=True,verbose_name='URL_Imagen',null=True)
     is_active = models.BooleanField(default=True,verbose_name='Disponible')
     created_date = models.DateField(auto_now_add=True,verbose_name='Fecha de creacion')
     updated_date = models.DateField(auto_now=True,verbose_name='Fecha de actualizacion')

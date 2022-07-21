@@ -65,7 +65,7 @@
                                   <th scope="col">Total Pedido</th>
                                   <th scope="col" style="width:10px;padding:30px">Fecha</th>
                                   <th scope="col">Estado</th>
-                                  {% if user.is_admin %}
+                                  {% if users.is_admin %}
                                   <th scope="col" style="text-align:center;">Cancelar Pedido</th>
                                   {% endif %}
                                 </tr>
@@ -86,12 +86,13 @@
                                           {% elif order.status == 'Completed' %}
                                           <td style="color:green;">{{ order.status_verbose }}</td>
                                           {% endif%}
-
-                                        {% if user.is_admin  %}
+                                            
+                                        {% if users.is_admin  %}
+                                      
                                         {% if order.status == 'Accepted' %}
                                         <form action="{% url 'borrar_pedido' order.id %}" method="POST">
                                           {% csrf_token %}
-                                        <td style="text-align:center;"><button style="font-size:0.5em" class="btn btn-danger">x</button></td>
+                                        <td style="text-align:center;"><button type="submit" style="font-size:0.5em" class="btn btn-danger">x</button></td>
                                           
                                           </form
                                         {% endif %}
