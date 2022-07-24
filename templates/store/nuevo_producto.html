@@ -22,11 +22,12 @@
                 {% endif %}
                 
             </header>
-            <div class="card-body">
+            <div class="card-body" style="padding-left:20em;padding-top:5vh; margin-bottom:5vh;">
                 <div class="row">
                 <form action="{% url 'nuevo_producto' %}" method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}
+                <br>
                 <button type="submit" class="save btn btn-primary">Guardar Producto</button>
                 </form>
                     

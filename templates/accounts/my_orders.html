@@ -14,6 +14,7 @@
         <main class="col-md-9">
             <article class="card">
             <header class="card-header">
+
               <form action="{% url 'filtrar_pedido' %}" method="POST">
                 {% csrf_token %}
                 {% if users.is_admin %}
@@ -41,13 +42,17 @@
                 </span>
                 <span><button id="boton_filtro" type="submit" class="btn btn-success" style="width:80px;border-radius:15px;padding:5px;margin-left:5px;" disabled>Filtrar</button></span>
               </form>
+
               {% if users.is_admin %}
               {% if orders %}
               <hr>
               <div class="container">
+              
                 <form action="{% url 'exporta_pedidos_xls' %}" method="POST">
                   {% csrf_token %}    
                 <button type="submit" id="btn" class="btn btn-outline-success" disabled="true">Cumplir Pedidos Aceptados</button>
+                </form>
+
               </div>
               {% endif %}
               {% endif %}
@@ -66,7 +71,7 @@
                                   <th scope="col" style="width:10px;padding:30px">Fecha</th>
                                   <th scope="col">Estado</th>
                                   {% if users.is_admin %}
-                                  <th scope="col" style="text-align:center;">Cancelar Pedido</th>
+                                  <th scope="col" id="lblborrar" style="text-align:center;">Cancelar Pedido</th>
                                   {% endif %}
                                 </tr>
                               </thead>
@@ -90,11 +95,12 @@
                                         {% if users.is_admin  %}
                                       
                                         {% if order.status == 'Accepted' %}
+
                                         <form action="{% url 'borrar_pedido' order.id %}" method="POST">
                                           {% csrf_token %}
-                                        <td style="text-align:center;"><button type="submit" style="font-size:0.5em" class="btn btn-danger">x</button></td>
-                                          
-                                          </form
+                                        <td style="text-align:center;"><button id="btn-borrar" type="submit" style="font-size:0.5em" class="btn btn-danger">x</button></td>  
+                                        </form>
+
                                         {% endif %}
                                         {% endif %}
                                       
@@ -206,7 +212,8 @@
           $("#titulo_pedidos").text("Todos los Pedidos");
         }
       }
-    
+     
+           
     </script>
     
 

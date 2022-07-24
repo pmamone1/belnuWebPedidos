@@ -22,6 +22,11 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.sites.shortcuts import get_current_site
 
+import environ
+env = environ.Env()
+environ.Env.read_env()
+
+PASSWORD_GMAIL = env('PASSWORD_GMAIL')
 
 # Create your views here.
 
@@ -186,7 +191,7 @@ def order_complete(request,user,user_id,user_email,numero_vendedor,grand_total,n
 
     # Configuracion de los mails
     email_sender = 'belnu.pedidos@gmail.com'
-    email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+    email_password = env('PASSWORD_GMAIL') #esta es la contraseña global de gmail para este mail
     
     email_receiver = user_email
 

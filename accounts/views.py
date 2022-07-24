@@ -25,11 +25,16 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 
-
-
 from carts.views import _cart_id
 from carts.models import Cart, CartItem
 import requests
+
+import environ
+env = environ.Env()
+environ.Env.read_env()
+
+PASSWORD_GMAIL = env('PASSWORD_GMAIL')
+
 
 # Create your views here.
 def register(request):
@@ -66,7 +71,7 @@ def register(request):
 
             # Configuracion de los mails
             email_sender = 'belnu.pedidos@gmail.com'
-            email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+            email_password = env('PASSWORD_GMAIL') #esta es la contraseña global de gmail para este mail
             email_receiver = email
 
             # configuramos el mail 
@@ -174,7 +179,7 @@ def login(request):
 
                 # Configuracion de los mails
                 email_sender = 'belnu.pedidos@gmail.com'
-                email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+                email_password = env('PASSWORD_GMAIL') #esta es la contraseña global de gmail para este mail
                 email_receiver = email
 
                 # configuramos el mail 
@@ -263,7 +268,7 @@ def forgotPassword(request):
 
             # Configuracion de los mails
             email_sender = 'belnu.pedidos@gmail.com'
-            email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+            email_password = env('PASSWORD_GMAIL') #esta es la contraseña global de gmail para este mail
             email_receiver = email
 
             # configuramos el mail 
@@ -426,7 +431,7 @@ def my_orders(request):
 def borrar_pedido(request, pk):
     order = Order.objects.get(pk=pk)
     if order.status =="Accepted":
-        print("Entro")
+        print("Entro a borrar pedido!")
         order.status ="Cancelado"
         order.is_ordered = False
         order.save()
@@ -435,7 +440,7 @@ def borrar_pedido(request, pk):
 
         # Configuracion de los mails
         email_sender = 'belnu.pedidos@gmail.com'
-        email_password = 'gmgznpennopfxvjg' #esta es la contraseña global de gmail para este mail
+        email_password = env('PASSWORD_GMAIL') #esta es la contraseña global de gmail para este mail
         email_receiver = order.email
 
         # configuramos el mail 
@@ -461,7 +466,9 @@ def borrar_pedido(request, pk):
             smtp.sendmail(email_sender, email_receiver, em.as_string())
         return redirect('my_orders')
     else:
-        print("no entro")
+        messages.error(request, 'El pedido no se pudo cancelar reintentelo!')
+        print("no entro a borrar pedido")
+        return redirect('my_orders')
 
 
 
@@ -544,6 +551,7 @@ def selected_order(request, order_id):
 
 
 def cumplir_pedidos(request):
+    print("entro a cumplir pedidos")
     messages.success(request, 'Se exporto a excel los pedidos!')
     order = Order.objects.filter(status="Accepted")
     for item in order:
@@ -556,7 +564,7 @@ def cumplir_pedidos(request):
 
 def exporta_pedidos_xls(request):
     messages.success(request, 'Se exporto a excel los pedidos!')
-    print("entro al exportador")
+    print("entro al exportador de peidos al excel")
     response = HttpResponse(content_type='application/ms-excel')
     
     response['Content-Disposition'] = 'attachment; filename="Pedidos.xls"'
@@ -578,29 +586,32 @@ def exporta_pedidos_xls(request):
     # Sheet body, remaining rows
     font_style = xlwt.XFStyle()
     order=Order.objects.filter(status="Accepted")
-    for item in order:
-        rows = OrderProduct.objects.filter(order=item).values_list('profile__numero_vendedor', 'profile__nombre_vendedor', 'product__product_name', 'variation__variation_value', 'quantity', 'numero_pedido')
-        for row in rows:
-            print(row)
-            row_num += 1
-            for col_num in range(len(row)):
-                ws.write(row_num, col_num, row[col_num], xlwt.easyxf("pattern: pattern solid, fore_color white; font: color black; align: horiz center; border: left thin, bottom thin, right thin"))
+    if order.count() > 0:
+        for item in order:
+            rows = OrderProduct.objects.filter(order=item).values_list('profile__numero_vendedor', 'profile__nombre_vendedor', 'product__product_name', 'variation__variation_value', 'quantity', 'numero_pedido')
+            for row in rows:
+                print(row)
+                row_num += 1
+                for col_num in range(len(row)):
+                    ws.write(row_num, col_num, row[col_num], xlwt.easyxf("pattern: pattern solid, fore_color white; font: color black; align: horiz center; border: left thin, bottom thin, right thin"))
 
-    # Darle estilo al archivo XLS
-    estilo = xlwt.XFStyle()
-    estilo.alignment.horz = 'HORZ_CENTER'  
-    
-    bordes = estilo.borders
-    estilo.pattern_back_colour = 41
-    
-    wb.save(response)
-    print(response)
-    print("se guardo el archivo!")
-    
-    order = Order.objects.filter(status="Accepted")
-    for item in order:
-        item.status = "Completed"
-        item.save()
-    
-    return response
-    
+        # Darle estilo al archivo XLS
+        estilo = xlwt.XFStyle()
+        estilo.alignment.horz = 'HORZ_CENTER'  
+        
+        bordes = estilo.borders
+        estilo.pattern_back_colour = 41
+        
+        wb.save(response)
+        print(response)
+        print("se guardo el archivo!")
+        
+        order = Order.objects.filter(status="Accepted")
+        for item in order:
+            item.status = "Completed"
+            item.save()
+        
+        return response
+    else:
+        print("No hay pedidos para exportar")
+        messages.error(request, 'No hay pedidos para exportar!')        

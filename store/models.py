@@ -140,6 +140,7 @@ class Variation(models.Model):
     is_active = models.BooleanField(default=True,verbose_name='Disponible')
     created_date = models.DateField(auto_now_add=True,verbose_name='Fecha de creacion')
     updated_date = models.DateField(auto_now=True,verbose_name='Fecha de actualizacion')
+    precio_ed = models.DecimalField(max_digits=18,decimal_places=2,verbose_name='Precio Ed.',null=True,blank=True)
     
     objects = VariationManager()
     
@@ -150,6 +151,7 @@ class Variation(models.Model):
         return self.variation_category + ": " + self.variation_value
     
     
+    
     class Meta:
         verbose_name = "Edicion"
         verbose_name_plural = "Ediciones"
@@ -158,4 +160,20 @@ class Variation(models.Model):
                 fields=['product', 'variation_value'], name='id_titulo_edicion'
             )
         ]       
-        
+
+class Banner(models.Model):
+    coleccion = models.CharField(max_length=100,verbose_name='Coleccion')
+    image = models.ImageField(upload_to='photos/banners',verbose_name='URL_Imagen')
+    is_active = models.BooleanField(default=True,verbose_name='Activo')
+    
+    class Meta:
+        verbose_name = "Banner"
+        verbose_name_plural = "Banners"
+
+class ProductGallery(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,verbose_name='Producto',default=None)
+    image = models.ImageField(upload_to='store/products',max_length=255,verbose_name='Imagenes')
+    
+    def __str__(self):
+        return self.product.product_name
+    

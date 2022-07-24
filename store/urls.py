@@ -11,4 +11,5 @@ urlpatterns = [
     path('buscar_titulo/<int:product>/<int:edicion>/',VariationApiView.as_view(),name="variation_api"), # url para ajax de buscar titulo + edicion
     path('get_ajax_titulo/', views.get_ajax_titulo , name = "get_ajax_titulo"), # url para ajax de buscar titulo
     path('nuevo_producto/', views.nuevo_producto, name='nuevo_producto'),
+    path('submit_review/<int:product_id>/', views.submit_review, name='submit_review'),
 ]
