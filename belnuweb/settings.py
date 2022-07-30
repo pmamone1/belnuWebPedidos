@@ -19,7 +19,7 @@ DEBUG = True
 
 PASSWORD_GMAIL = env('PASSWORD_GMAIL')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['http://belnuwebpedidos-env.eba-vihheqh3.us-east-2.elasticbeanstalk.com/']
 
 
 # Application definition
