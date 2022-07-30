@@ -1,5 +1,9 @@
 import environ
 from pathlib import Path
+import django_heroku
+import dj_database_url
+from decouple import config
+
 
 
 # Initialise environment variables
@@ -19,7 +23,7 @@ DEBUG = True
 
 PASSWORD_GMAIL = env('PASSWORD_GMAIL')
 
-ALLOWED_HOSTS = ['http://belnuwebpedidos-env.eba-vihheqh3.us-east-2.elasticbeanstalk.com/']
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -54,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_session_timeout.middleware.SessionTimeoutMiddleware',
+    'white_noise.middleware.WhiteNoiseMiddleware',
 ]
 
 
@@ -150,6 +155,8 @@ STATICFILES_DIRS = [
     'belnuweb/static',
 ]
 
+STATICFILES_STORAGE = 'white_noise.storage.CompressedManifestStaticFilesStorage'
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /'media'
@@ -167,3 +174,5 @@ MESSAGE_TAGS = {
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+django_heroku.settings(locals())
