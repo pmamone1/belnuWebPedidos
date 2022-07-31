@@ -23,7 +23,7 @@ DEBUG = True
 
 PASSWORD_GMAIL = env('PASSWORD_GMAIL')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://belnupedidos.herokuapp.com/']
 
 # Application definition
 
