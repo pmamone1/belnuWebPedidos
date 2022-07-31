@@ -106,10 +106,10 @@ DATABASES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'BelnuWeb',
-        'USER': 'postgres',
-        'PASSWORD': 'pablo1612',
-        'HOST': 'localhost',
+        'NAME': 'dd6cjnapvghmus',
+        'USER': env('USER_HEROKU'),
+        'PASSWORD': env('PASSWORD_HEROKU'),
+        'HOST': env('HOST'),
         'PORT': '5432',
     }
 }
